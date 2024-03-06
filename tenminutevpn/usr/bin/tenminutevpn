@@ -1,0 +1,4 @@
+#!/bin/bash
+
+export LIBPATH="/usr/share/tenminutevpn"
+source ${LIBPATH}/tenminutevpn.bash
