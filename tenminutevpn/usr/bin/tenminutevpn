@@ -1,4 +1,6 @@
 #!/bin/bash
 
-export LIBPATH="/usr/share/tenminutevpn"
-source ${LIBPATH}/tenminutevpn.bash
+TENMINUTEVPN_PATH="/usr/share/tenminutevpn"
+export TENMINUTEVPN_PATH
+
+source ${TENMINUTEVPN_PATH}/tenminutevpn.bash
