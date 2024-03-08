@@ -21,6 +21,12 @@ network_ipv4_private() {
     ip addr show dev "$interface" | awk '/inet / {print $2}' | cut -d/ -f1
 }
 
+### wireguard ##################################################################
+
+WIREGUARD_INTERFACE="wg0"
+WIREGUARD_ADDRESS="100.96.0.1/24"
+WIREGUARD_PORT="51820"
+
 # function that generates a new wireguard keypair in target directory
 wireguard_generate_keypair() {
     local target_dir="$1"
@@ -29,9 +35,6 @@ wireguard_generate_keypair() {
     chmod 600 "$target_dir/privatekey"
 }
 
-WIREGUARD_INTERFACE="wg0"
-WIREGUARD_ADDRESS="100.96.0.1/24"
-WIREGUARD_PORT="51820"
 
 # function that generates a new wireguard configuration file
 wireguard_generate_server_config() {
@@ -75,9 +78,121 @@ EOF
     chmod 600 "$WIREGUARD_PEERS_PATH/client-1.conf"
 }
 
+# function that adds a new wireguard peer
+
+wireguard_add_peer() {
+    local interface="$1"
+    local publickey="$2"
+    local allowed_ips="$3"
+
+    cat <<EOF >> "/etc/wireguard/$interface.conf"
+[Peer]
+PublicKey = $publickey
+AllowedIPs = $allowed_ips
+EOF
+}
+
 # function that starts wireguard interface
 wireguard_start() {
-    local interface="$1"
-    systemctl start "wg-quick@$interface"
-    systemctl enable "wg-quick@$interface"
+    systemctl start "wg-quick@$WIREGUARD_INTERFACE"
+    systemctl enable "wg-quick@$WIREGUARD_INTERFACE"
 }
+
+# function that reloads wireguard interface
+
+wireguard_reload() {
+    systemctl reload "wg-quick@$WIREGUARD_INTERFACE"
+}
+
+# function that stops wireguard interface
+
+wireguard_stop() {
+    systemctl stop "wg-quick@$WIREGUARD_INTERFACE"
+    systemctl disable "wg-quick@$WIREGUARD_INTERFACE"
+}
+
+# function that sets up wireguard interface
+
+wireguard_setup() {
+    local interface="$1"
+    local ipv4_private="$2"
+
+    wireguard_generate_keypair "/etc/wireguard"
+    wireguard_generate_server_config "$interface" "$(cat /etc/wireguard/privatekey)"
+    wireguard_generate_client_config "$interface" "$(cat /etc/wireguard/privatekey)" "$(cat /etc/wireguard/publickey)" "$(network_ipv4_public)"
+    wireguard_start
+}
+
+### squid ######################################################################
+
+# function that creates a new squid configuration file
+
+squid_generate_config() {
+    local interface="$1"
+    local ipv4_private="$2"
+
+    cat <<EOF > "/etc/squid/squid.conf"
+http_port 3128
+http_access allow all
+EOF
+}
+
+# function that starts squid
+
+squid_start() {
+    systemctl start "squid"
+    systemctl enable "squid"
+}
+
+# function that stops squid
+
+squid_stop() {
+    systemctl stop "squid"
+    systemctl disable "squid"
+}
+
+# function that sets up squid
+
+squid_setup() {
+    local interface="$1"
+    local ipv4_private="$2"
+
+    squid_generate_config "$interface" "$ipv4_private"
+    squid_start
+}
+
+
+### main #######################################################################
+
+# function that prints usage
+
+usage() {
+    cat <<EOF
+Usage: $0 [OPTION]...
+EOF
+}
+
+# function that sets up the server
+
+setup() {
+    local interface="$(network_interface_default)"
+    local ipv4_private="$(network_ipv4_private "$interface")"
+
+    wireguard_setup "$interface" "$ipv4_private"
+    squid_setup "$interface" "$ipv4_private"
+}
+
+# function that parses command line options
+
+while getopts "h" option; do
+    case "$option" in
+        help)
+            usage
+            exit 0
+            ;;
+        *)
+            usage >&2
+            exit 1
+            ;;
+    esac
+done
