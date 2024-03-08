@@ -6,6 +6,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     iproute2 \
     iptables \
+    make \
     wireguard-tools
 
-COPY --chmod=0744 ./src/tenminutevpn.bash /usr/local/bin/tenminutevpn
+COPY src /opt/src
+COPY test /opt/test
+COPY Makefile /opt/Makefile
+WORKDIR /opt

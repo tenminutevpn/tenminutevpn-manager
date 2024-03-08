@@ -30,9 +30,9 @@ network_ipv4_private() {
 
 ### wireguard ##################################################################
 
-WIREGUARD_INTERFACE="wg0"
-WIREGUARD_ADDRESS="100.96.0.1/24"
-WIREGUARD_PORT="51820"
+WIREGUARD_INTERFACE="${WIREGUARD_INTERFACE:-wg0}"
+WIREGUARD_ADDRESS="${WIREGUARD_ADDRESS:-100.96.0.1/24}"
+WIREGUARD_PORT="${WIREGUARD_PORT:-51820}"
 
 # function that generates a new wireguard keypair in target directory
 wireguard_generate_keypair() {
