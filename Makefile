@@ -14,10 +14,12 @@ test: ## Run the tests
 	$(MAKEFILE_DIR)/test/bats/bin/bats $(MAKEFILE_DIR)/test/test.bats
 
 .PHONY: build
-build: ## Build the DEB package
-    mkdir -p $(MAKEFILE_DIR)/build/usr/bin
-    cp $(MAKEFILE_DIR)/src/tenminutevpn.bash $(MAKEFILE_DIR)/build/usr/bin/tenminutevpn
+build:
+	mkdir -p $(MAKEFILE_DIR)/build/usr/bin
+	cp $(MAKEFILE_DIR)/src/tenminutevpn.bash $(MAKEFILE_DIR)/build/usr/bin/tenminutevpn
 
+tenminutevpn.deb: build ## Build the DEB package
+	dpkg-deb --build --root-owner-group $(MAKEFILE_DIR)/build $(MAKEFILE_DIR)/tenminutevpn.deb
 
 .PHONY: shell
 shell: ## Start the shell (devcontainer)
