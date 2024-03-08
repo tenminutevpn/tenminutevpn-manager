@@ -9,11 +9,17 @@ help: ## Show this help
 lint: ## Run linter
 	shellcheck $(MAKEFILE_DIR)/src/*
 
+.PHONY: test
+test: ## Run the tests
+	$(MAKEFILE_DIR)/test/bats/bin/bats $(MAKEFILE_DIR)/test/test.bats
+
+.PHONY: build
+build: ## Build the DEB package
+    mkdir -p $(MAKEFILE_DIR)/build/usr/bin
+    cp $(MAKEFILE_DIR)/src/tenminutevpn.bash $(MAKEFILE_DIR)/build/usr/bin/tenminutevpn
+
+
 .PHONY: shell
 shell: ## Start the shell (devcontainer)
 	docker build -t tenminutevpn:workspace -f $(MAKEFILE_DIR)/.devcontainer/Dockerfile $(MAKEFILE_DIR)
 	docker run -it --rm -v $(MAKEFILE_DIR):/workspace -w /workspace tenminutevpn:devcontainer
-
-.PHONY: test
-test: ## Run the tests
-	$(MAKEFILE_DIR)/test/bats/bin/bats $(MAKEFILE_DIR)/test/test.bats
