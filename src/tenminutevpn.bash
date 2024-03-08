@@ -5,6 +5,13 @@ set -e -o pipefail
 TENMINUTEVPN_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
 export PATH="$(dirname "$TENMINUTEVPN_PATH"):$PATH"
 
+TENMINUTEVPN_CONFIG_PATH="${TENMINUTEVPN_CONFIG_PATH:-/etc/default/tenminutevpn}"
+if [ -f "$TENMINUTEVPN_CONFIG_PATH" ]; then
+    source "$TENMINUTEVPN_CONFIG_PATH"
+fi
+
+### network ####################################################################
+
 # function that finds default interface
 network_interface_default() {
     ip route | awk '/^default/ {print $5}'
@@ -182,17 +189,15 @@ setup() {
     squid_setup "$interface" "$ipv4_private"
 }
 
-# function that parses command line options
+# parses command line options
 
-while getopts "h" option; do
-    case "$option" in
-        help)
-            usage
-            exit 0
-            ;;
-        *)
-            usage >&2
-            exit 1
-            ;;
-    esac
-done
+case "$1" in
+    setup)
+        setup
+        ;;
+    *)
+        usage
+        ;;
+esac
+
+exit 0
