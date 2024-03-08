@@ -17,6 +17,11 @@ build: ## Build the docker image
 run: ## Run the docker image
 	docker run -it --rm tenminutevpn:latest
 
+.PHONY: shell
+shell: ## Start the shell (devcontainer)
+	docker build -t tenminutevpn:workspace $(MAKEFILE_DIR)
+	docker run -it --rm -v $(MAKEFILE_DIR):/workspace -w /workspace tenminutevpn:devcontainer
+
 .PHONY: test
 test: ## Run the tests
 	$(MAKEFILE_DIR)/test/bats/bin/bats $(MAKEFILE_DIR)/test/test.bats
