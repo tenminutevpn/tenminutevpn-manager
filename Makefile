@@ -7,4 +7,16 @@ help: ## Show this help
 
 .PHONY: lint
 lint: ## Run linter
-	shellcheck $(MAKEFILE_DIR)/tenminutevpn/usr/{bin,share/tenminutevpn}/*
+	shellcheck $(MAKEFILE_DIR)/src/*
+
+.PHONY: build
+build: ## Build the docker image
+	docker build -t tenminutevpn:latest $(MAKEFILE_DIR)
+
+.PHONY: run
+run: ## Run the docker image
+	docker run -it --rm tenminutevpn:latest
+
+.PHONY: test
+test: ## Run the tests
+	$(MAKEFILE_DIR)/test/bats/bin/bats $(MAKEFILE_DIR)/test/test.bats
