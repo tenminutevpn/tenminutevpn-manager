@@ -9,17 +9,9 @@ help: ## Show this help
 lint: ## Run linter
 	shellcheck $(MAKEFILE_DIR)/src/*
 
-.PHONY: build
-build: ## Build the docker image
-	docker build -t tenminutevpn:latest $(MAKEFILE_DIR)
-
-.PHONY: run
-run: ## Run the docker image
-	docker run -it --rm tenminutevpn:latest
-
 .PHONY: shell
 shell: ## Start the shell (devcontainer)
-	docker build -t tenminutevpn:workspace $(MAKEFILE_DIR)
+	docker build -t tenminutevpn:workspace -f $(MAKEFILE_DIR)/.devcontainer/Dockerfile $(MAKEFILE_DIR)
 	docker run -it --rm -v $(MAKEFILE_DIR):/workspace -w /workspace tenminutevpn:devcontainer
 
 .PHONY: test
