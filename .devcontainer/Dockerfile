@@ -11,9 +11,3 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     make \
     shellcheck \
     wireguard-tools
-
-COPY src/tenminutevpn.bash /usr/bin/tenminutevpn
-COPY test /opt/test
-COPY Makefile /opt/Makefile
-
-WORKDIR /opt
