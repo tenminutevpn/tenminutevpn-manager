@@ -1,4 +1,5 @@
 MAKEFILE_DIR := $(realpath $(dir $(firstword $(MAKEFILE_LIST))))
+WORKSPACE := $(basename $(notdir $(MAKEFILE_DIR)))
 
 .DEFAULT_GOAL := help
 .PHONY: help
@@ -24,4 +25,4 @@ tenminutevpn.deb: build ## Build the DEB package
 .PHONY: shell
 shell: ## Start the shell (devcontainer)
 	docker build -t tenminutevpn:workspace -f $(MAKEFILE_DIR)/.devcontainer/Dockerfile $(MAKEFILE_DIR)
-	docker run -it --rm -v $(MAKEFILE_DIR):/workspace -w /workspace tenminutevpn:devcontainer
+	docker run -it --rm -v $(MAKEFILE_DIR):/workspace/$(WORKSPACE) -w /workspace/$(WORKSPACE) tenminutevpn:devcontainer
