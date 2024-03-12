@@ -44,7 +44,7 @@ jobs:
 
       - name: Parse version (remove the 'v' prefix and revision with a dash)
         id: version
-        run: echo "VERSION=$(echo ::set-output name=VERSION::${${GITHUB_REF#refs/tags/v}%-*})" >> "$GITHUB_OUTPUT"
+        run: echo "VERSION=$(VERSION=${GITHUB_REF#refs/tags/v}; echo ${VERSION%%-*})" >> "$GITHUB_OUTPUT"
 
       - name: Build
         run: make build VERSION=${{ steps.version.outputs.VERSION }}
