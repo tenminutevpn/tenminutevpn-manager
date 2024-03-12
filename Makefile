@@ -27,6 +27,7 @@ build: ## Build the debian package
 		export REVISION=$(REVISION) && \
 		envsubst < $(MAKEFILE_DIR)/dist/DEBIAN/control.template > $(MAKEFILE_DIR)/dist/DEBIAN/control
 	dpkg-deb --build --root-owner-group $(MAKEFILE_DIR)/dist $(MAKEFILE_DIR)/tenminutevpn-$(VERSION)-$(REVISION).deb
+	sha256sum tenminutevpn-$(VERSION)-$(REVISION).deb > tenminutevpn-$(VERSION)-$(REVISION).deb.sha256sum
 
 .PHONY: shell
 shell: ## Start the shell (devcontainer)
