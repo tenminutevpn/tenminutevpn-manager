@@ -1,4 +1,4 @@
 dist/DEBIAN/control
 dist/usr/bin/*
 *.deb
-*.deb.sha256sum
+SHA256SUMS

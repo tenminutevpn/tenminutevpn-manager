@@ -62,7 +62,7 @@ jobs:
           name: package
           path: |
             *.deb
-            *.deb.sha256sum
+            SHA256SUMS
 
   release:
     runs-on: ubuntu-22.04
@@ -89,4 +89,4 @@ jobs:
           generate_release_notes: true
           files: |
             *.deb
-            *.deb.sha256sum
+            SHA256SUMS
