@@ -18,6 +18,7 @@ test: ## Run the tests
 build:
 	mkdir -p $(MAKEFILE_DIR)/dist/usr/bin
 	cp $(MAKEFILE_DIR)/src/tenminutevpn.bash $(MAKEFILE_DIR)/dist/usr/bin/tenminutevpn
+	chmod +x $(MAKEFILE_DIR)/dist/usr/bin/tenminutevpn
 	dpkg-deb --build --root-owner-group $(MAKEFILE_DIR)/dist $(MAKEFILE_DIR)/tenminutevpn.deb
 
 .PHONY: shell
