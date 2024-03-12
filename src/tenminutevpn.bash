@@ -1,6 +1,9 @@
 #!/bin/bash
 
 set -e -o pipefail
+if [ -n "$TENMINUTEVPN_DEBUG" ]; then
+    set -x
+fi
 
 TENMINUTEVPN_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
 PATH="$(dirname "$TENMINUTEVPN_PATH"):$PATH"
@@ -50,6 +53,7 @@ wireguard_generate_server_config() {
     local interface="$1"
     local privatekey="$2"
 
+    mkdir -p "/etc/wireguard"
     cat <<EOF > "/etc/wireguard/$WIREGUARD_INTERFACE.conf"
 [Interface]
 PrivateKey = $privatekey
@@ -71,6 +75,7 @@ wireguard_generate_client_config() {
     local publickey="$3"
     local endpoint="$4"
 
+    mkdir -p "$WIREGUARD_PEERS_PATH"
     cat <<EOF > "$WIREGUARD_PEERS_PATH/client-1.conf"
 [Interface]
 PrivateKey = $privatekey
@@ -128,7 +133,11 @@ wireguard_setup() {
 
     wireguard_generate_keypair "/etc/wireguard"
     wireguard_generate_server_config "$interface" "$(cat /etc/wireguard/privatekey)"
-    wireguard_generate_client_config "$interface" "$(cat /etc/wireguard/privatekey)" "$(cat /etc/wireguard/publickey)" "$(network_ipv4_public)"
+
+    wireguard_generate_keypair "${WIREGUARD_PEERS_PATH}/client-1"
+    wireguard_generate_client_config "$interface" "$(cat "${WIREGUARD_PEERS_PATH}/client-1/privatekey")" "$(cat /etc/wireguard/publickey)" "$(network_ipv4_public):$WIREGUARD_PORT"
+    wireguard_add_peer "${WIREGUARD_INTERFACE}" "$(cat "${WIREGUARD_PEERS_PATH}/client-1/publickey")" "100.96.0.2/32"
+
     wireguard_start
 }
 
