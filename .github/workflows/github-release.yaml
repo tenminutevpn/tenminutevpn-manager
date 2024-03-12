@@ -44,16 +44,10 @@ jobs:
 
       - name: Parse version (remove the 'v' prefix and revision with a dash)
         id: version
-        run: echo ::set-output name=VERSION::${${GITHUB_REF#refs/tags/v}%-*}
-
-      - name: Parse revision
-        id: revision
-        run: echo ::set-output name=REVISION::${GITHUB_REF#refs/tags/v*-}
+        run: echo "VERSION=$(echo ::set-output name=VERSION::${${GITHUB_REF#refs/tags/v}%-*})" >> "$GITHUB_OUTPUT"
 
       - name: Build
-        run: make build
-        env:
-          VERSION: ${{ steps.version.outputs.VERSION }}
+        run: make build VERSION=${{ steps.version.outputs.VERSION }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
