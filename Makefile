@@ -14,7 +14,8 @@ lint: ## Run linter
 test: ## Run the tests
 	$(MAKEFILE_DIR)/test/bats/bin/bats $(MAKEFILE_DIR)/test/test.bats
 
-VERSION ?= $(shell git describe --tags --abbrev=0 | sed 's/^v//')
+VERSION ?= $(shell git describe --tags --abbrev=0)
+VERSION := $(shell echo $(VERSION) | sed -e 's/^v//')
 REVISION ?= $(shell git rev-parse --short HEAD)$(shell git diff --quiet || echo -dirty)
 
 .PHONY: build
