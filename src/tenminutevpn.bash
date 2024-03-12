@@ -1,6 +1,9 @@
 #!/bin/bash
 
 set -e -o pipefail
+if [ -n "$TENMINUTEVPN_DEBUG" ]; then
+    set -x
+fi
 
 TENMINUTEVPN_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
 PATH="$(dirname "$TENMINUTEVPN_PATH"):$PATH"
