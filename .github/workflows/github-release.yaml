@@ -36,6 +36,7 @@ jobs:
 
   build:
     runs-on: ubuntu-22.04
+    needs: [lint, test]
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
@@ -60,4 +61,30 @@ jobs:
         with:
           name: package
           path: |
+            *.deb
+
+  release:
+    runs-on: ubuntu-22.04
+    needs: [build, test]
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check if pre-release
+        id: prerelease
+        run: |
+          echo "PRERELEASE=$(if [[ "${{ github.ref }}" == *"rc"* ]]; then echo "true"; else echo "false"; fi)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: package
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          prerelease: ${{ steps.prerelease.outputs.PRERELEASE }}
+          generate_release_notes: true
+          files: |
             *.deb
