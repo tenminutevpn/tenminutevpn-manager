@@ -31,3 +31,7 @@ build:
 shell: ## Start the shell (devcontainer)
 	docker build -t tenminutevpn:devcontainer -f $(MAKEFILE_DIR)/.devcontainer/Dockerfile $(MAKEFILE_DIR)
 	docker run -it --rm -v $(MAKEFILE_DIR):/workspace/$(WORKSPACE) -w /workspace/$(WORKSPACE) tenminutevpn:devcontainer
+
+.PHONY: clean
+clean: ## Clean up
+	git clean -fdx
