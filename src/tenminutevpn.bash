@@ -71,6 +71,7 @@ wireguard_generate_client_config() {
     local publickey="$3"
     local endpoint="$4"
 
+    mkdir -p "$WIREGUARD_PEERS_PATH"
     cat <<EOF > "$WIREGUARD_PEERS_PATH/client-1.conf"
 [Interface]
 PrivateKey = $privatekey
