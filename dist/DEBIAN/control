@@ -1,5 +1,5 @@
 Package: tenminutevpn
-Version: ${VERSION}
+Version: 0.1.0-1
 Section: base
 Priority: optional
 Architecture: all
