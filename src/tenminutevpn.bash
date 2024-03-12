@@ -3,10 +3,12 @@
 set -e -o pipefail
 
 TENMINUTEVPN_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
-export PATH="$(dirname "$TENMINUTEVPN_PATH"):$PATH"
+PATH="$(dirname "$TENMINUTEVPN_PATH"):$PATH"
+export PATH
 
 TENMINUTEVPN_CONFIG_PATH="${TENMINUTEVPN_CONFIG_PATH:-/etc/default/tenminutevpn}"
 if [ -f "$TENMINUTEVPN_CONFIG_PATH" ]; then
+    # shellcheck source=/dev/null
     source "$TENMINUTEVPN_CONFIG_PATH"
 fi
 
@@ -86,7 +88,7 @@ EOF
 }
 
 # function that adds a new wireguard peer
-
+# shellcheck disable=SC2317
 wireguard_add_peer() {
     local interface="$1"
     local publickey="$2"
@@ -106,13 +108,13 @@ wireguard_start() {
 }
 
 # function that reloads wireguard interface
-
+# shellcheck disable=SC2317
 wireguard_reload() {
     systemctl reload "wg-quick@$WIREGUARD_INTERFACE"
 }
 
 # function that stops wireguard interface
-
+# shellcheck disable=SC2317
 wireguard_stop() {
     systemctl stop "wg-quick@$WIREGUARD_INTERFACE"
     systemctl disable "wg-quick@$WIREGUARD_INTERFACE"
@@ -152,14 +154,14 @@ squid_start() {
 }
 
 # function that stops squid
-
+# shellcheck disable=SC2317
 squid_stop() {
     systemctl stop "squid"
     systemctl disable "squid"
 }
 
 # function that sets up squid
-
+# shellcheck disable=SC2317
 squid_setup() {
     local interface="$1"
     local ipv4_private="$2"
@@ -182,8 +184,10 @@ EOF
 # function that sets up the server
 
 setup() {
-    local interface="$(network_interface_default)"
-    local ipv4_private="$(network_ipv4_private "$interface")"
+    local interface
+    interface="$(network_interface_default)"
+    local ipv4_private
+    ipv4_private="$(network_ipv4_private "$interface")"
 
     wireguard_setup "$interface" "$ipv4_private"
     squid_setup "$interface" "$ipv4_private"
