@@ -18,7 +18,7 @@ VERSION ?= $(shell git describe --tags --abbrev=0 | sed 's/^v//')
 REVISION ?= $(shell git rev-parse --short HEAD)$(shell git diff --quiet || echo -dirty)
 
 .PHONY: build
-build:
+build: ## Build the debian package
 	mkdir -p $(MAKEFILE_DIR)/dist/usr/bin
 	cp $(MAKEFILE_DIR)/src/tenminutevpn.bash $(MAKEFILE_DIR)/dist/usr/bin/tenminutevpn
 	chmod +x $(MAKEFILE_DIR)/dist/usr/bin/tenminutevpn
