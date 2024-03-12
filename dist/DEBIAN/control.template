@@ -1,0 +1,7 @@
+Package: tenminutevpn
+Version: ${VERSION}
+Section: base
+Priority: optional
+Architecture: all
+Maintainer: Andrey Gubarev <andrey@andreygubarev.com>
+Description: Ten Minute VPN

@@ -1,2 +1,3 @@
+dist/DEBIAN/control
 dist/usr/bin/*
 *.deb
