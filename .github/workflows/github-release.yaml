@@ -12,15 +12,22 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure Fast APT Mirror
-        uses: vegardit/fast-apt-mirror.sh@v1
+      - name: Lint
+        run: make lint
+
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Build
         run: make build
