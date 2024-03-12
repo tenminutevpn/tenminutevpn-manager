@@ -19,9 +19,10 @@ build:
 	mkdir -p $(MAKEFILE_DIR)/dist/usr/bin
 	cp $(MAKEFILE_DIR)/src/tenminutevpn.bash $(MAKEFILE_DIR)/dist/usr/bin/tenminutevpn
 	chmod +x $(MAKEFILE_DIR)/dist/usr/bin/tenminutevpn
+	envsubst < $(MAKEFILE_DIR)/dist/DEBIAN/control.template > $(MAKEFILE_DIR)/dist/DEBIAN/control
 	dpkg-deb --build --root-owner-group $(MAKEFILE_DIR)/dist $(MAKEFILE_DIR)/tenminutevpn.deb
 
 .PHONY: shell
 shell: ## Start the shell (devcontainer)
-	docker build -t tenminutevpn:workspace -f $(MAKEFILE_DIR)/.devcontainer/Dockerfile $(MAKEFILE_DIR)
+	docker build -t tenminutevpn:devcontainer -f $(MAKEFILE_DIR)/.devcontainer/Dockerfile $(MAKEFILE_DIR)
 	docker run -it --rm -v $(MAKEFILE_DIR):/workspace/$(WORKSPACE) -w /workspace/$(WORKSPACE) tenminutevpn:devcontainer

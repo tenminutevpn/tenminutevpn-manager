@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
     dpkg-dev \
+    gettext-base \
     git \
     iproute2 \
     iptables \
