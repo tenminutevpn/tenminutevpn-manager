@@ -42,12 +42,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Parse version (remove the 'v' prefix and revision with a dash)
+      - name: Parse version
         id: version
-        run: echo "VERSION=$(VERSION=${GITHUB_REF#refs/tags/v}; echo ${VERSION%%-*})" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "VERSION=$(VERSION=${GITHUB_REF#refs/tags/v}; echo ${VERSION%%-*})" >> "$GITHUB_OUTPUT"
+          if [[ $GITHUB_REF == refs/tags/v*-* ]]; then
+            echo "REVISION=$(REVISION=${GITHUB_REF#refs/tags/v}; echo ${REVISION#*-})" >> "$GITHUB_OUTPUT"
+          else
+            echo "REVISION=1" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Build
-        run: make build VERSION=${{ steps.version.outputs.VERSION }}
+        run: make build VERSION=${{ steps.version.outputs.VERSION }} REVISION=${{ steps.version.outputs.REVISION }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
