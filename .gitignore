@@ -1,2 +1,2 @@
-build/usr/bin/*
+dist/usr/bin/*
 *.deb
