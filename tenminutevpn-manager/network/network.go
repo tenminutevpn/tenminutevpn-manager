@@ -1,6 +1,7 @@
 package network
 
 import (
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -32,6 +33,7 @@ func GetPublicIPv4() (net.IP, error) {
 
 	ip := net.ParseIP(string(body))
 	if ip == nil {
+		err = fmt.Errorf("invalid ip address: %s", string(body))
 		return nil, err
 	}
 
