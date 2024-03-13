@@ -9,7 +9,6 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "tenminutevpn-manager",
 	Short: "TenMinuteVPN Manager",
-	Long:  "TenMinuteVPN Manager is a CLI tool for managing TenMinuteVPN servers.",
 }
 
 func Execute() {
