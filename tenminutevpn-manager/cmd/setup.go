@@ -8,6 +8,20 @@ import (
 )
 
 func setup() {
+	iface, err := network.GetDefaultInterface()
+	if err != nil {
+		fmt.Println("failed to get default interface:", err)
+		return
+	}
+	fmt.Println(iface)
+
+	privateip, err := network.GetPrivateIPv4(iface)
+	if err != nil {
+		fmt.Println("failed to get private ip:", err)
+		return
+	}
+	fmt.Println(privateip.String())
+
 	ip, err := network.GetPublicIPv4()
 	if err != nil {
 		fmt.Println(err)
