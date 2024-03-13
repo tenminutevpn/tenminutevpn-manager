@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+	"text/template"
 )
 
 func GenKey() (string, error) {
@@ -43,7 +44,7 @@ func GenKeypair() (string, string, error) {
 	return privkey, pubkey, nil
 }
 
-func WriteKeypair(folder string, privkey string, pubkey string) error {
+func WriteKeypair(folder string, privateKey string, publicKey string) error {
 	privkeyPath := path.Join(folder, "privkey")
 	privkeyFile, err := os.Create(privkeyPath)
 	if err != nil {
@@ -51,7 +52,7 @@ func WriteKeypair(folder string, privkey string, pubkey string) error {
 	}
 	defer privkeyFile.Close()
 
-	_, err = privkeyFile.WriteString(privkey)
+	_, err = privkeyFile.WriteString(privateKey)
 	if err != nil {
 		return fmt.Errorf("failed to write private key to file: %w", err)
 	}
@@ -63,10 +64,39 @@ func WriteKeypair(folder string, privkey string, pubkey string) error {
 	}
 	defer pubkeyFile.Close()
 
-	_, err = pubkeyFile.WriteString(pubkey)
+	_, err = pubkeyFile.WriteString(publicKey)
 	if err != nil {
 		return fmt.Errorf("failed to write public key to file: %w", err)
 	}
 
 	return nil
+}
+
+const serverConfigTemplate = `[Interface]
+Address = {{ .Address }}
+PrivateKey = {{ .PrivateKey }}
+ListenPort = {{ .ListenPort }}
+PostUp = iptables -A FORWARD -i {{ .WireguardInterface }} -j ACCEPT; iptables -t nat -A POSTROUTING -o {{ .Interface }} -j MASQUERADE
+PostDown = iptables -D FORWARD -i {{ .WireguardInterface }} -j ACCEPT; iptables -t nat -D POSTROUTING -o {{ .Interface }} -j MASQUERADE
+`
+
+func GenServerConfig(iface string, privateKey string) string {
+	tpl := template.Must(template.New("serverConfig").Parse(serverConfigTemplate))
+	data := struct {
+		Address            string
+		PrivateKey         string
+		ListenPort         string
+		WireguardInterface string
+		Interface          string
+	}{
+		Address:            "100.96.0.1/24",
+		PrivateKey:         privateKey,
+		ListenPort:         "51820",
+		WireguardInterface: "wg0",
+		Interface:          iface,
+	}
+
+	var config strings.Builder
+	tpl.Execute(&config, data)
+	return config.String()
 }

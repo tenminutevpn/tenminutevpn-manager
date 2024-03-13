@@ -10,12 +10,26 @@ import (
 )
 
 func setup() {
+	privateKey, _, err := wireguard.GenKeypair()
+	if err != nil {
+		log.Fatalf("failed to generate keypair: %s", err.Error())
+	}
+
+	// folder := "/etc/wireguard"
+	// err = wireguard.WriteKeypair(folder, privateKey, pubkey)
+	// if err != nil {
+	// 	log.Fatalf("failed to write keypair: %s", err.Error())
+	// }
+
 	iface, err := network.GetDefaultInterface()
 	if err != nil {
 		fmt.Println("failed to get default interface:", err)
 		return
 	}
 	fmt.Println(iface)
+
+	config := wireguard.GenServerConfig(iface, privateKey)
+	fmt.Println(config)
 
 	privateip, err := network.GetPrivateIPv4(iface)
 	if err != nil {
@@ -30,17 +44,6 @@ func setup() {
 		return
 	}
 	fmt.Println(ip.String())
-
-	privkey, pubkey, err := wireguard.GenKeypair()
-	if err != nil {
-		log.Fatalf("failed to generate keypair: %w", err)
-	}
-
-	folder := "/etc/wireguard"
-	err = wireguard.WriteKeypair(folder, privkey, pubkey)
-	if err != nil {
-		log.Fatalf("failed to write keypair: %w", err)
-	}
 
 }
 
