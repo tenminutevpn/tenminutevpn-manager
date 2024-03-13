@@ -1,17 +1,27 @@
 package wireguard
 
 import (
-	"fmt"
 	"os/exec"
 	"strings"
 )
 
-func GenKey() string {
+func GenKey() (string, error) {
 	cmd := exec.Command("wg", "genkey")
 	out, err := cmd.Output()
 	if err != nil {
-		fmt.Println(err)
+		return "", err
 	}
-	key := strings.TrimSpace(string(out))
-	return key
+	privkey := strings.TrimSpace(string(out))
+	return privkey, nil
+}
+
+func GenPublicKey(privkey string) (string, error) {
+	cmd := exec.Command("wg", "pubkey")
+	cmd.Stdin = strings.NewReader(privkey)
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	pubkey := strings.TrimSpace(string(out))
+	return pubkey, nil
 }

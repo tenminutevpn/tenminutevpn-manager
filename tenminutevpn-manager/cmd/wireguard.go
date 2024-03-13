@@ -11,8 +11,25 @@ var wireguardGeneratePrivateKeyCmd = &cobra.Command{
 	Use:   "genkey",
 	Short: "Generate a Wireguard Keypair",
 	Run: func(cmd *cobra.Command, args []string) {
-		privkey := wireguard.GenKey()
+		privkey, err := wireguard.GenKey()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 		fmt.Println(privkey)
+	},
+}
+
+var wireguardGeneratePublicKeyCmd = &cobra.Command{
+	Use:   "pubkey",
+	Short: "Generate a Wireguard Public Key",
+	Run: func(cmd *cobra.Command, args []string) {
+		pubkey, err := wireguard.GenPublicKey(args[0])
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(pubkey)
 	},
 }
 
@@ -35,5 +52,6 @@ func init() {
 	rootCmd.AddCommand(wireguardCmd)
 
 	wireguardCmd.AddCommand(wireguardGeneratePrivateKeyCmd)
+	wireguardCmd.AddCommand(wireguardGeneratePublicKeyCmd)
 	wireguardCmd.AddCommand(wireguardSetupCmd)
 }
