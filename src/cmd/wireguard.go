@@ -2,29 +2,45 @@ package cmd
 
 import (
 	"fmt"
+	"os/exec"
 
 	"github.com/spf13/cobra"
 )
 
-func wireguardGenerateKeypair(cmd *cobra.Command, args []string) {
-	fmt.Println("generate-keypair called")
+// generate a new Wireguard private key using the `wg` command
+func wireguardGeneratePrivateKey(_ *cobra.Command, args []string) {
+	cmd := exec.Command("wg", "genkey")
+	out, err := cmd.Output()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(out))
 }
 
-var wireguardGenerateKeypairCmd = &cobra.Command{
-	Use:   "generate-keypair",
+var wireguardGeneratePrivateKeyCmd = &cobra.Command{
+	Use:   "genkey",
 	Short: "Generate a Wireguard Keypair",
-	Long:  "Generate a Wireguard Keypair",
-	Run:   wireguardGenerateKeypair,
+	Run:   wireguardGeneratePrivateKey,
+}
+
+func wireguardSetup(cmd *cobra.Command, args []string) {
+	fmt.Println("setup called")
+}
+
+var wireguardSetupCmd = &cobra.Command{
+	Use:   "setup",
+	Short: "Setup WireGuard Interface",
+	Run:   wireguardSetup,
 }
 
 var wireguardCmd = &cobra.Command{
 	Use:   "wireguard",
 	Short: "TenMinuteVPN Wireguard",
-	Long:  "Wireguard is a fast, modern, and secure VPN tunnel",
 }
 
 func init() {
 	rootCmd.AddCommand(wireguardCmd)
 
-	wireguardCmd.AddCommand(wireguardGenerateKeypairCmd)
+	wireguardCmd.AddCommand(wireguardGeneratePrivateKeyCmd)
+	wireguardCmd.AddCommand(wireguardSetupCmd)
 }
