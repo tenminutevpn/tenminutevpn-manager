@@ -2,25 +2,18 @@ package cmd
 
 import (
 	"fmt"
-	"os/exec"
 
 	"github.com/spf13/cobra"
+	"github.com/tenminutevpn/tenminutevpn-manager/wireguard"
 )
-
-// generate a new Wireguard private key using the `wg` command
-func wireguardGeneratePrivateKey(_ *cobra.Command, args []string) {
-	cmd := exec.Command("wg", "genkey")
-	out, err := cmd.Output()
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(string(out))
-}
 
 var wireguardGeneratePrivateKeyCmd = &cobra.Command{
 	Use:   "genkey",
 	Short: "Generate a Wireguard Keypair",
-	Run:   wireguardGeneratePrivateKey,
+	Run: func(cmd *cobra.Command, args []string) {
+		privkey := wireguard.GenKey()
+		fmt.Println(privkey)
+	},
 }
 
 func wireguardSetup(cmd *cobra.Command, args []string) {
