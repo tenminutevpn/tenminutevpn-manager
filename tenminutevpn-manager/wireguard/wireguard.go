@@ -44,11 +44,6 @@ func GenKeypair() (string, string, error) {
 }
 
 func WriteKeypair(folder string, privkey string, pubkey string) error {
-	privkey, pubkey, err := GenKeypair()
-	if err != nil {
-		return fmt.Errorf("failed to generate keypair: %w", err)
-	}
-
 	privkeyPath := path.Join(folder, "privkey")
 	privkeyFile, err := os.Create(privkeyPath)
 	if err != nil {
