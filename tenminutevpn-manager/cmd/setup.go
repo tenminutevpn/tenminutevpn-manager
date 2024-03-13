@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 	"github.com/tenminutevpn/tenminutevpn-manager/network"
+	"github.com/tenminutevpn/tenminutevpn-manager/wireguard"
 )
 
 func setup() {
@@ -28,6 +30,18 @@ func setup() {
 		return
 	}
 	fmt.Println(ip.String())
+
+	privkey, pubkey, err := wireguard.GenKeypair()
+	if err != nil {
+		log.Fatalf("failed to generate keypair: %w", err)
+	}
+
+	folder := "/etc/wireguard"
+	err = wireguard.WriteKeypair(folder, privkey, pubkey)
+	if err != nil {
+		log.Fatalf("failed to write keypair: %w", err)
+	}
+
 }
 
 var setupCmd = &cobra.Command{
