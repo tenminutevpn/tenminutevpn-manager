@@ -10,6 +10,22 @@ import (
 )
 
 func setup() {
+	netIface, err := network.GetDefaultInterface()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	wg := wireguard.NewWireguard(netIface, "wg0", nil, 51820)
+
+	wgPrivateKey, err := wireguard.GenKey()
+	if err != nil {
+		log.Fatalf("failed to generate private key: %s", err.Error())
+		return
+	}
+
+	wg.SetPrivateKey(wgPrivateKey)
+
 	privateKey, _, err := wireguard.GenKeypair()
 	if err != nil {
 		log.Fatalf("failed to generate keypair: %s", err.Error())

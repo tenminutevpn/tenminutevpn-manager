@@ -23,7 +23,7 @@ func GetDefaultInterface() (string, error) {
 	cmd := exec.Command("bash", "-c", bashCmd)
 	out, err := cmd.Output()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to get default interface: %w", err)
 	}
 	return string(bytes.TrimSpace(out)), nil
 

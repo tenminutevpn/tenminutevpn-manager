@@ -2,6 +2,7 @@ package wireguard
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"path"
@@ -9,11 +10,41 @@ import (
 	"text/template"
 )
 
+type Wireguard struct {
+	NetworkInterface  string
+	WireguardIterface string
+
+	Address net.IPMask
+	Port    int
+
+	PrivateKey string
+	PublicKey  string
+}
+
+func NewWireguard(networkInterface string, wireguardInterface string, address net.IPMask, port int) *Wireguard {
+	return &Wireguard{
+		NetworkInterface:  networkInterface,
+		WireguardIterface: wireguardInterface,
+		Address:           address,
+		Port:              port,
+	}
+}
+
+func (w *Wireguard) SetPrivateKey(privateKey string) error {
+	w.PrivateKey = privateKey
+	publickey, err := GenPublicKey(privateKey)
+	if err != nil {
+		return err
+	}
+	w.PublicKey = publickey
+	return nil
+}
+
 func GenKey() (string, error) {
 	cmd := exec.Command("wg", "genkey")
 	out, err := cmd.Output()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to generate private key: %w", err)
 	}
 	privkey := strings.TrimSpace(string(out))
 	return privkey, nil
@@ -24,7 +55,7 @@ func GenPublicKey(privkey string) (string, error) {
 	cmd.Stdin = strings.NewReader(privkey)
 	out, err := cmd.Output()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to generate public key: %w", err)
 	}
 	pubkey := strings.TrimSpace(string(out))
 	return pubkey, nil
