@@ -8,6 +8,7 @@ import (
 const peerTemplate = `[Peer]
 PublicKey = {{ .Wireguard.KeyPair.PublicKey }}
 AllowedIPs = {{ .AllowedIPs }}
+{{ if ne .Wireguard.Port 0 }}Endpoint = {{ .Wireguard.GetPublicIPv4 }}:{{ .Wireguard.Port }}{{ end }}
 `
 
 type WireguardPeer struct {

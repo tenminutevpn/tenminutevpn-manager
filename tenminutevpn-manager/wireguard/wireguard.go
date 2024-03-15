@@ -2,6 +2,8 @@ package wireguard
 
 import (
 	"fmt"
+
+	"github.com/tenminutevpn/tenminutevpn-manager/network"
 )
 
 type Wireguard struct {
@@ -42,6 +44,14 @@ func NewWireguard(name string, networkInterface string, addr string, port int) (
 	}, nil
 }
 
+func (wg *Wireguard) GetPublicIPv4() string {
+	ip, err := network.GetPublicIPv4()
+	if err != nil {
+		return ""
+	}
+	return ip.String()
+}
+
 func (wg *Wireguard) GetConfig() *wireguardConfig {
 	return makeWireguardConfig(
 		wg.Name,
@@ -74,7 +84,7 @@ func (wg *Wireguard) AddPeer(client *Wireguard) error {
 	}
 	server.Peers = append(server.Peers, clientPeer)
 
-	serverPeer, err := NewWireguardPeer(server, server.Address.String())
+	serverPeer, err := NewWireguardPeer(server, "0.0.0.0/0")
 	if err != nil {
 		return fmt.Errorf("failed to create peer (client -> server): %w", err)
 	}
