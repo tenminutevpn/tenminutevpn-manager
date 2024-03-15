@@ -42,29 +42,16 @@ func (wg *Wireguard) SetPrivateKey(privateKey string) error {
 	return nil
 }
 
-func (wg *Wireguard) GetTemplateData() interface{} {
-	mask, _ := wg.IPNet.Mask.Size()
-	address := fmt.Sprintf("%s/%d", wg.IP.String(), mask)
-	return struct {
-		Address            string
-		PrivateKey         string
-		ListenPort         string
-		WireguardInterface string
-		NetworkInterface   string
-	}{
-		Address:            address,
-		PrivateKey:         wg.PrivateKey,
-		ListenPort:         fmt.Sprintf("%d", wg.Port),
-		WireguardInterface: wg.WireguardInterface,
-		NetworkInterface:   wg.NetworkInterface,
-	}
-}
-
-func (wg *Wireguard) RenderConfig(data interface{}) string {
-	tpl := template.Must(template.New("serverConfig").Parse(serverConfigTemplate))
-	var cfg strings.Builder
-	tpl.Execute(&cfg, data)
-	return cfg.String()
+func (wg *Wireguard) ToServerConfig() *serverConfig {
+	addressMask, _ := wg.IPNet.Mask.Size()
+	address := fmt.Sprintf("%s/%d", wg.IP.String(), addressMask)
+	return makeServerConfig(
+		wg.WireguardInterface,
+		address,
+		wg.PrivateKey,
+		fmt.Sprintf("%d", wg.Port),
+		wg.NetworkInterface,
+	)
 }
 
 func GenKey() (string, error) {
@@ -86,20 +73,6 @@ func GenPublicKey(privkey string) (string, error) {
 	}
 	pubkey := strings.TrimSpace(string(out))
 	return pubkey, nil
-}
-
-func GenKeypair() (string, string, error) {
-	privkey, err := GenKey()
-	if err != nil {
-		return "", "", err
-	}
-
-	pubkey, err := GenPublicKey(privkey)
-	if err != nil {
-		return "", "", err
-	}
-
-	return privkey, pubkey, nil
 }
 
 func WriteKeypair(folder string, privateKey string, publicKey string) error {

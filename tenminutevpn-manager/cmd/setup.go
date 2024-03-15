@@ -10,14 +10,15 @@ import (
 )
 
 func setup() {
-	ip, ipNet, err := net.ParseCIDR("100.96.0.1/24")
+	wgAddress := "100.96.0.1/24"
+	wgName := "wg0"
+	wgPort := 51820
+
+	ip, ipNet, err := net.ParseCIDR(wgAddress)
 	if err != nil {
 		log.Fatalf("failed to parse CIDR: %s", err.Error())
 		return
 	}
-
-	wgName := "wg0"
-	wgPort := 51820
 
 	iface, err := network.GetDefaultInterface()
 	if err != nil {
@@ -33,9 +34,6 @@ func setup() {
 		return
 	}
 	wg.SetPrivateKey(wgPrivateKey)
-
-	data := wg.GetTemplateData()
-	log.Println(wg.RenderConfig(data))
 
 }
 
