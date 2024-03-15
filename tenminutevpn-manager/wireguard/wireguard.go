@@ -41,8 +41,8 @@ func NewWireguard(name string, networkInterface string, addr string, port int) (
 	}, nil
 }
 
-func (wg *Wireguard) GetServerConfig() *serverConfig {
-	return makeServerConfig(
+func (wg *Wireguard) GetConfig() *wireguardConfig {
+	return makeWireguardConfig(
 		wg.Name,
 		wg.Address.String(),
 		wg.KeyPair.PrivateKey,
@@ -51,7 +51,7 @@ func (wg *Wireguard) GetServerConfig() *serverConfig {
 	)
 }
 
-func (wg *Wireguard) WriteServerConfig(filename string) error {
-	serverConfig := wg.GetServerConfig()
+func (wg *Wireguard) WriteConfig(filename string) error {
+	serverConfig := wg.GetConfig()
 	return serverConfig.Write(filename)
 }

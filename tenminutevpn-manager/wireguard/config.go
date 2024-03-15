@@ -19,7 +19,7 @@ PostDown = iptables -D FORWARD -i {{ .Name }} -j ACCEPT; iptables -t nat -D POST
 {{- end }}
 `
 
-type serverConfig struct {
+type wireguardConfig struct {
 	Name             string
 	Address          string
 	PrivateKey       string
@@ -27,8 +27,8 @@ type serverConfig struct {
 	NetworkInterface string
 }
 
-func makeServerConfig(name, address, privateKey, listenPort, networkInterface string) *serverConfig {
-	return &serverConfig{
+func makeWireguardConfig(name, address, privateKey, listenPort, networkInterface string) *wireguardConfig {
+	return &wireguardConfig{
 		Name:             name,
 		Address:          address,
 		PrivateKey:       privateKey,
@@ -37,14 +37,14 @@ func makeServerConfig(name, address, privateKey, listenPort, networkInterface st
 	}
 }
 
-func (cfg *serverConfig) Render() string {
+func (cfg *wireguardConfig) Render() string {
 	tpl := template.Must(template.New("serverConfig").Parse(configTemplate))
 	var output strings.Builder
 	tpl.Execute(&output, cfg)
 	return output.String()
 }
 
-func (cfg *serverConfig) Write(filename string) error {
+func (cfg *wireguardConfig) Write(filename string) error {
 	if filename == "" {
 		return fmt.Errorf("filename is empty")
 	}

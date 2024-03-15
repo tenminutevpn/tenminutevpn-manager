@@ -22,11 +22,14 @@ func wireguardSetup(wgName string, wgAddress string, wgPort int) {
 		return
 	}
 
-	err = wg.WriteServerConfig(fmt.Sprintf("/tmp/%s.conf", wgName))
+	err = wg.WriteConfig(fmt.Sprintf("/tmp/%s.conf", wgName))
 	if err != nil {
 		log.Fatalf("failed to write server config: %s", err.Error())
 		return
 	}
+
+	wgClient, err := wireguard.NewWireguard("client-1", "", "100.96.0.2/32", 0)
+	_ = wgClient.WriteConfig("/tmp/client-1.conf")
 }
 
 var wireguardSetupCmd = &cobra.Command{
