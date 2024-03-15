@@ -6,17 +6,17 @@ import (
 )
 
 type Wireguard struct {
-	NetworkInterface   string
-	WireguardInterface string
+	Name    string
+	KeyPair *KeyPair
+
+	NetworkInterface string
 
 	IP    net.IP
 	IPNet *net.IPNet
 	Port  int
-
-	KeyPair *KeyPair
 }
 
-func NewWireguard(wireguardInterface string, networkInterface string, ip net.IP, ipNet *net.IPNet, port int) (*Wireguard, error) {
+func NewWireguard(name string, networkInterface string, ip net.IP, ipNet *net.IPNet, port int) (*Wireguard, error) {
 	privkey, err := GeneratePrivateKey()
 	if err != nil {
 		return nil, err
@@ -28,8 +28,8 @@ func NewWireguard(wireguardInterface string, networkInterface string, ip net.IP,
 	}
 
 	return &Wireguard{
-		NetworkInterface:   networkInterface,
-		WireguardInterface: wireguardInterface,
+		NetworkInterface: networkInterface,
+		Name:             name,
 
 		IP:    ip,
 		IPNet: ipNet,
@@ -43,7 +43,7 @@ func (wg *Wireguard) GetServerConfig() *serverConfig {
 	addressMask, _ := wg.IPNet.Mask.Size()
 	address := fmt.Sprintf("%s/%d", wg.IP.String(), addressMask)
 	return makeServerConfig(
-		wg.WireguardInterface,
+		wg.Name,
 		address,
 		wg.KeyPair.PrivateKey,
 		fmt.Sprintf("%d", wg.Port),
