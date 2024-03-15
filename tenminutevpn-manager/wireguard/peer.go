@@ -7,22 +7,28 @@ import (
 
 const peerTemplate = `[Peer]
 PublicKey = {{ .Wireguard.KeyPair.PublicKey }}
-AllowedIPs = {{ .AllowedIPs }}
+AllowedIPs = {{ range .AllowedIPs }}{{ .String }}, {{ end }}
 {{ if ne .Wireguard.Port 0 }}Endpoint = {{ .Wireguard.GetPublicIPv4 }}:{{ .Wireguard.Port }}{{ end }}
 {{ if ne .PersistentKeepalive 0 }}PersistentKeepalive = {{ .PersistentKeepalive }}{{ end }}
 `
 
 type WireguardPeer struct {
 	Wireguard           *Wireguard
-	AllowedIPs          *Address
+	AllowedIPs          []*Address
 	PersistentKeepalive int
 }
 
-func NewWireguardPeer(wg *Wireguard, addr string, persistentKeepalive int) (*WireguardPeer, error) {
-	allowedIPs, err := NewAddressFromString(addr)
-	if err != nil {
-		return nil, err
+func NewWireguardPeer(wg *Wireguard, addrs []string, persistentKeepalive int) (*WireguardPeer, error) {
+	allowedIPs := make([]*Address, 0)
+
+	for _, addr := range addrs {
+		a, err := NewAddressFromString(addr)
+		if err != nil {
+			return nil, err
+		}
+		allowedIPs = append(allowedIPs, a)
 	}
+
 	return &WireguardPeer{
 		Wireguard:           wg,
 		AllowedIPs:          allowedIPs,
