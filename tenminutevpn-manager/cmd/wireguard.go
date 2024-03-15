@@ -2,45 +2,50 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"net"
 
 	"github.com/spf13/cobra"
+	"github.com/tenminutevpn/tenminutevpn-manager/network"
 	"github.com/tenminutevpn/tenminutevpn-manager/wireguard"
 )
 
-var wireguardGeneratePrivateKeyCmd = &cobra.Command{
-	Use:   "genkey",
-	Short: "Generate a Wireguard Keypair",
-	Run: func(cmd *cobra.Command, args []string) {
-		privkey, err := wireguard.GenKey()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println(privkey)
-	},
-}
+func wireguardSetup(wgName string, wgAddress string, wgPort int) {
+	ip, ipNet, err := net.ParseCIDR(wgAddress)
+	if err != nil {
+		log.Fatalf("failed to parse CIDR: %s", err.Error())
+		return
+	}
 
-var wireguardGeneratePublicKeyCmd = &cobra.Command{
-	Use:   "pubkey",
-	Short: "Generate a Wireguard Public Key",
-	Run: func(cmd *cobra.Command, args []string) {
-		pubkey, err := wireguard.GenPublicKey(args[0])
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println(pubkey)
-	},
-}
+	iface, err := network.GetDefaultInterface()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 
-func wireguardSetup(cmd *cobra.Command, args []string) {
-	fmt.Println("setup called")
+	wg := wireguard.NewWireguard(wgName, iface, ip, ipNet, wgPort)
+
+	wgPrivateKey, err := wireguard.GenKey()
+	if err != nil {
+		log.Fatalf("failed to generate private key: %s", err.Error())
+		return
+	}
+	wg.SetPrivateKey(wgPrivateKey)
+
+	serverConfig := wg.ToServerConfig()
+	err = serverConfig.WriteToFile(fmt.Sprintf("/tmp/%s.conf", wgName))
+	if err != nil {
+		log.Fatalf("failed to write server config: %s", err.Error())
+		return
+	}
 }
 
 var wireguardSetupCmd = &cobra.Command{
 	Use:   "setup",
 	Short: "Setup WireGuard Interface",
-	Run:   wireguardSetup,
+	Run: func(cmd *cobra.Command, args []string) {
+		wireguardSetup("wg0", "100.96.0.1/24", 51820)
+	},
 }
 
 var wireguardCmd = &cobra.Command{
@@ -51,7 +56,5 @@ var wireguardCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(wireguardCmd)
 
-	wireguardCmd.AddCommand(wireguardGeneratePrivateKeyCmd)
-	wireguardCmd.AddCommand(wireguardGeneratePublicKeyCmd)
 	wireguardCmd.AddCommand(wireguardSetupCmd)
 }
