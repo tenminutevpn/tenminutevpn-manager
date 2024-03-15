@@ -43,7 +43,7 @@ func (cfg *serverConfig) Render() string {
 	return output.String()
 }
 
-func (cfg *serverConfig) WriteToFile(filename string) error {
+func (cfg *serverConfig) Write(filename string) error {
 	if filename == "" {
 		return fmt.Errorf("filename is empty")
 	}

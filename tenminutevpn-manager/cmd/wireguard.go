@@ -32,8 +32,7 @@ func wireguardSetup(wgName string, wgAddress string, wgPort int) {
 	}
 	wg.SetPrivateKey(wgPrivateKey)
 
-	serverConfig := wg.ToServerConfig()
-	err = serverConfig.WriteToFile(fmt.Sprintf("/tmp/%s.conf", wgName))
+	err = wg.WriteServerConfig(fmt.Sprintf("/tmp/%s.conf", wgName))
 	if err != nil {
 		log.Fatalf("failed to write server config: %s", err.Error())
 		return

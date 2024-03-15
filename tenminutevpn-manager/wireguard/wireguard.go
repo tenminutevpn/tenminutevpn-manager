@@ -39,7 +39,7 @@ func (wg *Wireguard) SetPrivateKey(privateKey string) error {
 	return nil
 }
 
-func (wg *Wireguard) ToServerConfig() *serverConfig {
+func (wg *Wireguard) GetServerConfig() *serverConfig {
 	addressMask, _ := wg.IPNet.Mask.Size()
 	address := fmt.Sprintf("%s/%d", wg.IP.String(), addressMask)
 	return makeServerConfig(
@@ -49,6 +49,11 @@ func (wg *Wireguard) ToServerConfig() *serverConfig {
 		fmt.Sprintf("%d", wg.Port),
 		wg.NetworkInterface,
 	)
+}
+
+func (wg *Wireguard) WriteServerConfig(filename string) error {
+	serverConfig := wg.GetServerConfig()
+	return serverConfig.Write(filename)
 }
 
 func GenKey() (string, error) {
