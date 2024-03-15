@@ -12,7 +12,7 @@ type Wireguard struct {
 	Address          *Address
 	Port             int
 
-	Peers []*Wireguard
+	Peers []*WireguardPeer
 }
 
 func NewWireguard(name string, networkInterface string, addr string, port int) (*Wireguard, error) {
@@ -43,17 +43,13 @@ func NewWireguard(name string, networkInterface string, addr string, port int) (
 }
 
 func (wg *Wireguard) GetConfig() *wireguardConfig {
-	peers := make([]peerConfig, 0, len(wg.Peers))
-	for _, peer := range wg.Peers {
-		peers = append(peers, peer.GetPeerConfig())
-	}
 	return makeWireguardConfig(
 		wg.Name,
 		wg.Address.String(),
 		wg.KeyPair.PrivateKey,
 		fmt.Sprintf("%d", wg.Port),
 		wg.NetworkInterface,
-		peers,
+		wg.Peers,
 	)
 }
 
@@ -62,13 +58,27 @@ func (wg *Wireguard) WriteConfig(filename string) error {
 	return serverConfig.Write(filename)
 }
 
-func (wg *Wireguard) AddPeer(peer *Wireguard) {
-	wg.Peers = append(wg.Peers, peer)
+func (wg *Wireguard) ToPeer(allowedIPs *Address) *WireguardPeer {
+	return &WireguardPeer{
+		Wireguard:  wg,
+		AllowedIPs: allowedIPs,
+	}
 }
 
-func (wg *Wireguard) GetPeerConfig() peerConfig {
-	return peerConfig{
-		PublicKey:  wg.KeyPair.PublicKey,
-		AllowedIPs: "0.0.0.0/0",
+func (wg *Wireguard) AddPeer(client *Wireguard) error {
+	server := wg
+
+	clientPeer, err := NewWireguardPeer(client, client.Address.String())
+	if err != nil {
+		return fmt.Errorf("failed to create peer (server -> client): %w", err)
 	}
+	server.Peers = append(server.Peers, clientPeer)
+
+	serverPeer, err := NewWireguardPeer(server, server.Address.String())
+	if err != nil {
+		return fmt.Errorf("failed to create peer (client -> server): %w", err)
+	}
+	client.Peers = append(client.Peers, serverPeer)
+
+	return nil
 }

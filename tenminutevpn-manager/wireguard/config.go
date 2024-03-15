@@ -5,30 +5,6 @@ import (
 	"text/template"
 )
 
-const peerConfigTemplate = `[Peer]
-PublicKey = {{ .PublicKey }}
-AllowedIPs = {{ .AllowedIPs }}
-`
-
-type peerConfig struct {
-	PublicKey  string
-	AllowedIPs string
-}
-
-func makePeerConfig(publicKey, allowedIPs string) *peerConfig {
-	return &peerConfig{
-		PublicKey:  publicKey,
-		AllowedIPs: allowedIPs,
-	}
-}
-
-func (cfg *peerConfig) Render() string {
-	tpl := template.Must(template.New("peerConfig").Parse(peerConfigTemplate))
-	var output strings.Builder
-	tpl.Execute(&output, cfg)
-	return output.String()
-}
-
 const configTemplate = `[Interface]
 # Name = {{ .Name }}
 PrivateKey = {{ .PrivateKey }}
@@ -51,10 +27,10 @@ type wireguardConfig struct {
 	PrivateKey       string
 	ListenPort       string
 	NetworkInterface string
-	Peers            []peerConfig
+	Peers            []*WireguardPeer
 }
 
-func makeWireguardConfig(name, address, privateKey, listenPort, networkInterface string, peers []peerConfig) *wireguardConfig {
+func makeWireguardConfig(name, address, privateKey, listenPort, networkInterface string, peers []*WireguardPeer) *wireguardConfig {
 	return &wireguardConfig{
 		Name:             name,
 		Address:          address,
