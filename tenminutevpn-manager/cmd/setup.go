@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"net"
 
@@ -35,6 +36,12 @@ func setup() {
 	}
 	wg.SetPrivateKey(wgPrivateKey)
 
+	serverConfig := wg.ToServerConfig()
+	err = serverConfig.WriteToFile(fmt.Sprintf("/tmp/%s.conf", wgName))
+	if err != nil {
+		log.Fatalf("failed to write server config: %s", err.Error())
+		return
+	}
 }
 
 var setupCmd = &cobra.Command{
