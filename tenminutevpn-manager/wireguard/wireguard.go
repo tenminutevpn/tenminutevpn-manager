@@ -3,11 +3,8 @@ package wireguard
 import (
 	"fmt"
 	"net"
-	"os"
 	"os/exec"
-	"path"
 	"strings"
-	"text/template"
 )
 
 type Wireguard struct {
@@ -73,60 +70,4 @@ func GenPublicKey(privkey string) (string, error) {
 	}
 	pubkey := strings.TrimSpace(string(out))
 	return pubkey, nil
-}
-
-func WriteKeypair(folder string, privateKey string, publicKey string) error {
-	if _, err := os.Stat(folder); os.IsNotExist(err) {
-		err := os.Mkdir(folder, 0700)
-		if err != nil {
-			return fmt.Errorf("failed to create directory: %w", err)
-		}
-	}
-
-	privkeyPath := path.Join(folder, "privkey")
-	privkeyFile, err := os.Create(privkeyPath)
-	if err != nil {
-		return fmt.Errorf("failed to create private key file: %w", err)
-	}
-	defer privkeyFile.Close()
-
-	_, err = privkeyFile.WriteString(privateKey)
-	if err != nil {
-		return fmt.Errorf("failed to write private key to file: %w", err)
-	}
-
-	pubkeyPath := path.Join(folder, "pubkey")
-	pubkeyFile, err := os.Create(pubkeyPath)
-	if err != nil {
-		return fmt.Errorf("failed to create public key file: %w", err)
-	}
-	defer pubkeyFile.Close()
-
-	_, err = pubkeyFile.WriteString(publicKey)
-	if err != nil {
-		return fmt.Errorf("failed to write public key to file: %w", err)
-	}
-
-	return nil
-}
-
-func GenServerConfig(iface string, privateKey string) string {
-	tpl := template.Must(template.New("serverConfig").Parse(serverConfigTemplate))
-	data := struct {
-		Address            string
-		PrivateKey         string
-		ListenPort         string
-		WireguardInterface string
-		Interface          string
-	}{
-		Address:            "100.96.0.1/24",
-		PrivateKey:         privateKey,
-		ListenPort:         "51820",
-		WireguardInterface: "wg0",
-		Interface:          iface,
-	}
-
-	var config strings.Builder
-	tpl.Execute(&config, data)
-	return config.String()
 }
