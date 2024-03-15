@@ -7,7 +7,7 @@ import (
 	"text/template"
 )
 
-const serverConfigTemplate = `[Interface]
+const configTemplate = `[Interface]
 # Name = {{ .Name }}
 PrivateKey = {{ .PrivateKey }}
 Address = {{ .Address }}
@@ -38,7 +38,7 @@ func makeServerConfig(name, address, privateKey, listenPort, networkInterface st
 }
 
 func (cfg *serverConfig) Render() string {
-	tpl := template.Must(template.New("serverConfig").Parse(serverConfigTemplate))
+	tpl := template.Must(template.New("serverConfig").Parse(configTemplate))
 	var output strings.Builder
 	tpl.Execute(&output, cfg)
 	return output.String()
