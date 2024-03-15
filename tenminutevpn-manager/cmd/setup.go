@@ -17,6 +17,7 @@ func setup() {
 	}
 
 	wgName := "wg0"
+	wgPort := 51820
 
 	iface, err := network.GetDefaultInterface()
 	if err != nil {
@@ -24,7 +25,7 @@ func setup() {
 		return
 	}
 
-	wg := wireguard.NewWireguard(iface, wgName, ip, ipNet.Mask, 51820)
+	wg := wireguard.NewWireguard(wgName, iface, ip, ipNet, wgPort)
 
 	wgPrivateKey, err := wireguard.GenKey()
 	if err != nil {
@@ -33,7 +34,8 @@ func setup() {
 	}
 	wg.SetPrivateKey(wgPrivateKey)
 
-	log.Println(wg.RenderConfig())
+	data := wg.GetTemplateData()
+	log.Println(wg.RenderConfig(data))
 
 }
 

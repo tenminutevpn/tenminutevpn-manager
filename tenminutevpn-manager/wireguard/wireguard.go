@@ -14,20 +14,20 @@ type Wireguard struct {
 	NetworkInterface   string
 	WireguardInterface string
 
-	Address     net.IP
-	AddressMask net.IPMask
-	Port        int
+	IP    net.IP
+	IPNet *net.IPNet
+	Port  int
 
 	PrivateKey string
 	PublicKey  string
 }
 
-func NewWireguard(networkInterface string, wireguardInterface string, address net.IP, addressMask net.IPMask, port int) *Wireguard {
+func NewWireguard(wireguardInterface string, networkInterface string, ip net.IP, ipNet *net.IPNet, port int) *Wireguard {
 	return &Wireguard{
 		NetworkInterface:   networkInterface,
 		WireguardInterface: wireguardInterface,
-		Address:            address,
-		AddressMask:        addressMask,
+		IP:                 ip,
+		IPNet:              ipNet,
 		Port:               port,
 	}
 }
@@ -42,11 +42,29 @@ func (wg *Wireguard) SetPrivateKey(privateKey string) error {
 	return nil
 }
 
-func (wg *Wireguard) RenderConfig() string {
+func (wg *Wireguard) GetTemplateData() interface{} {
+	mask, _ := wg.IPNet.Mask.Size()
+	address := fmt.Sprintf("%s/%d", wg.IP.String(), mask)
+	return struct {
+		Address            string
+		PrivateKey         string
+		ListenPort         string
+		WireguardInterface string
+		NetworkInterface   string
+	}{
+		Address:            address,
+		PrivateKey:         wg.PrivateKey,
+		ListenPort:         fmt.Sprintf("%d", wg.Port),
+		WireguardInterface: wg.WireguardInterface,
+		NetworkInterface:   wg.NetworkInterface,
+	}
+}
+
+func (wg *Wireguard) RenderConfig(data interface{}) string {
 	tpl := template.Must(template.New("serverConfig").Parse(serverConfigTemplate))
-	var config strings.Builder
-	tpl.Execute(&config, wg)
-	return config.String()
+	var cfg strings.Builder
+	tpl.Execute(&cfg, data)
+	return cfg.String()
 }
 
 func GenKey() (string, error) {
