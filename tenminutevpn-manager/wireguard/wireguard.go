@@ -64,8 +64,7 @@ func (wg *Wireguard) GetConfig() *wireguardConfig {
 }
 
 func (wg *Wireguard) WriteConfig(filename string) error {
-	serverConfig := wg.GetConfig()
-	return serverConfig.Write(filename)
+	return wg.GetConfig().Write(filename)
 }
 
 func (wg *Wireguard) ToPeer(allowedIPs *Address) *WireguardPeer {
