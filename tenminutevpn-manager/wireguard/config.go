@@ -1,11 +1,33 @@
 package wireguard
 
 import (
-	"fmt"
-	"os"
 	"strings"
 	"text/template"
 )
+
+const peerConfigTemplate = `[Peer]
+PublicKey = {{ .PublicKey }}
+AllowedIPs = {{ .AllowedIPs }}
+`
+
+type peerConfig struct {
+	PublicKey  string
+	AllowedIPs string
+}
+
+func makePeerConfig(publicKey, allowedIPs string) *peerConfig {
+	return &peerConfig{
+		PublicKey:  publicKey,
+		AllowedIPs: allowedIPs,
+	}
+}
+
+func (cfg *peerConfig) Render() string {
+	tpl := template.Must(template.New("peerConfig").Parse(peerConfigTemplate))
+	var output strings.Builder
+	tpl.Execute(&output, cfg)
+	return output.String()
+}
 
 const configTemplate = `[Interface]
 # Name = {{ .Name }}
@@ -17,6 +39,10 @@ ListenPort = {{ .ListenPort }}
 PostUp = iptables -A FORWARD -i {{ .Name }} -j ACCEPT; iptables -t nat -A POSTROUTING -o {{ .NetworkInterface }} -j MASQUERADE
 PostDown = iptables -D FORWARD -i {{ .Name }} -j ACCEPT; iptables -t nat -D POSTROUTING -o {{ .NetworkInterface }} -j MASQUERADE
 {{- end }}
+
+{{- range .Peers }}
+{{ .Render }}
+{{- end }}
 `
 
 type wireguardConfig struct {
@@ -25,15 +51,17 @@ type wireguardConfig struct {
 	PrivateKey       string
 	ListenPort       string
 	NetworkInterface string
+	Peers            []peerConfig
 }
 
-func makeWireguardConfig(name, address, privateKey, listenPort, networkInterface string) *wireguardConfig {
+func makeWireguardConfig(name, address, privateKey, listenPort, networkInterface string, peers []peerConfig) *wireguardConfig {
 	return &wireguardConfig{
 		Name:             name,
 		Address:          address,
 		PrivateKey:       privateKey,
 		ListenPort:       listenPort,
 		NetworkInterface: networkInterface,
+		Peers:            peers,
 	}
 }
 
@@ -45,29 +73,6 @@ func (cfg *wireguardConfig) Render() string {
 }
 
 func (cfg *wireguardConfig) Write(filename string) error {
-	if filename == "" {
-		return fmt.Errorf("filename is empty")
-	}
-
-	if _, err := os.Stat(filename); err == nil {
-		return fmt.Errorf("file already exists: %s", filename)
-	}
-
-	file, err := os.Create(filename)
-	if err != nil {
-		return fmt.Errorf("failed to create file: %w", err)
-	}
-	defer file.Close()
-
-	err = file.Chmod(0600)
-	if err != nil {
-		return fmt.Errorf("failed to set file permissions: %w", err)
-	}
-
-	_, err = file.WriteString(cfg.Render())
-	if err != nil {
-		return fmt.Errorf("failed to write to file: %w", err)
-	}
-
-	return nil
+	data := cfg.Render()
+	return writeToFile(filename, 0600, data)
 }

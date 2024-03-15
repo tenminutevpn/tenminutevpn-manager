@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/spf13/cobra"
@@ -9,34 +8,40 @@ import (
 	"github.com/tenminutevpn/tenminutevpn-manager/wireguard"
 )
 
-func wireguardSetup(wgName string, wgAddress string, wgPort int) {
+func wireguardSetup() {
 	iface, err := network.GetDefaultInterface()
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	wg, err := wireguard.NewWireguard(wgName, iface, wgAddress, wgPort)
+	server, err := wireguard.NewWireguard("wg0", iface, "100.96.0.1/24", 51820)
 	if err != nil {
-		log.Fatalf("failed to create wireguard: %s", err.Error())
+		log.Fatal(err)
 		return
 	}
 
-	err = wg.WriteConfig(fmt.Sprintf("/tmp/%s.conf", wgName))
+	peer1, err := wireguard.NewWireguard("peer-1", "", "100.96.0.2/32", 0)
 	if err != nil {
-		log.Fatalf("failed to write server config: %s", err.Error())
+		log.Fatal(err)
 		return
 	}
 
-	wgClient, err := wireguard.NewWireguard("client-1", "", "100.96.0.2/32", 0)
-	_ = wgClient.WriteConfig("/tmp/client-1.conf")
+	server.AddPeer(peer1)
+
+	err = server.WriteConfig("/tmp/wg0.conf")
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
 }
 
 var wireguardSetupCmd = &cobra.Command{
 	Use:   "setup",
 	Short: "Setup WireGuard Interface",
 	Run: func(cmd *cobra.Command, args []string) {
-		wireguardSetup("wg0", "100.96.0.1/24", 51820)
+		wireguardSetup()
 	},
 }
 
