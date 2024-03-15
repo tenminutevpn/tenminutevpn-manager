@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func writeToFile(filename string, data string) error {
+func writeToFile(filename string, mode os.FileMode, data string) error {
 	if filename == "" {
 		return fmt.Errorf("filename is empty")
 	}
@@ -20,7 +20,7 @@ func writeToFile(filename string, data string) error {
 	}
 	defer file.Close()
 
-	err = file.Chmod(0600)
+	err = file.Chmod(mode)
 	if err != nil {
 		return fmt.Errorf("failed to change file permissions: %w", err)
 	}

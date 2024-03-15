@@ -11,6 +11,14 @@ type KeyPair struct {
 	PublicKey  string
 }
 
+func (kp *KeyPair) WritePrivateKey(filename string) error {
+	return writeToFile(filename, 0600, kp.PrivateKey)
+}
+
+func (kp *KeyPair) WritePublicKey(filename string) error {
+	return writeToFile(filename, 0644, kp.PublicKey)
+}
+
 func NewKeyPair(privateKey string) (*KeyPair, error) {
 	publicKey, err := GeneratePublicKey(privateKey)
 	if err != nil {

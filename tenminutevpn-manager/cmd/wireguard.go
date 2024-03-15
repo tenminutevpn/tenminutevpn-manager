@@ -23,14 +23,11 @@ func wireguardSetup(wgName string, wgAddress string, wgPort int) {
 		return
 	}
 
-	wg := wireguard.NewWireguard(wgName, iface, ip, ipNet, wgPort)
-
-	wgPrivateKey, err := wireguard.GenKey()
+	wg, err := wireguard.NewWireguard(wgName, iface, ip, ipNet, wgPort)
 	if err != nil {
-		log.Fatalf("failed to generate private key: %s", err.Error())
+		log.Fatalf("failed to create wireguard: %s", err.Error())
 		return
 	}
-	wg.SetPrivateKey(wgPrivateKey)
 
 	err = wg.WriteServerConfig(fmt.Sprintf("/tmp/%s.conf", wgName))
 	if err != nil {

@@ -3,8 +3,6 @@ package wireguard
 import (
 	"fmt"
 	"net"
-	"os/exec"
-	"strings"
 )
 
 type Wireguard struct {
@@ -15,28 +13,30 @@ type Wireguard struct {
 	IPNet *net.IPNet
 	Port  int
 
-	PrivateKey string
-	PublicKey  string
+	KeyPair *KeyPair
 }
 
-func NewWireguard(wireguardInterface string, networkInterface string, ip net.IP, ipNet *net.IPNet, port int) *Wireguard {
+func NewWireguard(wireguardInterface string, networkInterface string, ip net.IP, ipNet *net.IPNet, port int) (*Wireguard, error) {
+	privkey, err := GeneratePrivateKey()
+	if err != nil {
+		return nil, err
+	}
+
+	keyPair, err := NewKeyPair(privkey)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Wireguard{
 		NetworkInterface:   networkInterface,
 		WireguardInterface: wireguardInterface,
-		IP:                 ip,
-		IPNet:              ipNet,
-		Port:               port,
-	}
-}
 
-func (wg *Wireguard) SetPrivateKey(privateKey string) error {
-	wg.PrivateKey = privateKey
-	publickey, err := GenPublicKey(privateKey)
-	if err != nil {
-		return err
-	}
-	wg.PublicKey = publickey
-	return nil
+		IP:    ip,
+		IPNet: ipNet,
+		Port:  port,
+
+		KeyPair: keyPair,
+	}, nil
 }
 
 func (wg *Wireguard) GetServerConfig() *serverConfig {
@@ -45,7 +45,7 @@ func (wg *Wireguard) GetServerConfig() *serverConfig {
 	return makeServerConfig(
 		wg.WireguardInterface,
 		address,
-		wg.PrivateKey,
+		wg.KeyPair.PrivateKey,
 		fmt.Sprintf("%d", wg.Port),
 		wg.NetworkInterface,
 	)
@@ -54,25 +54,4 @@ func (wg *Wireguard) GetServerConfig() *serverConfig {
 func (wg *Wireguard) WriteServerConfig(filename string) error {
 	serverConfig := wg.GetServerConfig()
 	return serverConfig.Write(filename)
-}
-
-func GenKey() (string, error) {
-	cmd := exec.Command("wg", "genkey")
-	out, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("failed to generate private key: %w", err)
-	}
-	privkey := strings.TrimSpace(string(out))
-	return privkey, nil
-}
-
-func GenPublicKey(privkey string) (string, error) {
-	cmd := exec.Command("wg", "pubkey")
-	cmd.Stdin = strings.NewReader(privkey)
-	out, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("failed to generate public key: %w", err)
-	}
-	pubkey := strings.TrimSpace(string(out))
-	return pubkey, nil
 }
