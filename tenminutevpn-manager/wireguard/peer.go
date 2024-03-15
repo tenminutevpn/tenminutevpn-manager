@@ -9,21 +9,24 @@ const peerTemplate = `[Peer]
 PublicKey = {{ .Wireguard.KeyPair.PublicKey }}
 AllowedIPs = {{ .AllowedIPs }}
 {{ if ne .Wireguard.Port 0 }}Endpoint = {{ .Wireguard.GetPublicIPv4 }}:{{ .Wireguard.Port }}{{ end }}
+{{ if ne .PersistentKeepalive 0 }}PersistentKeepalive = {{ .PersistentKeepalive }}{{ end }}
 `
 
 type WireguardPeer struct {
-	Wireguard  *Wireguard
-	AllowedIPs *Address
+	Wireguard           *Wireguard
+	AllowedIPs          *Address
+	PersistentKeepalive int
 }
 
-func NewWireguardPeer(wg *Wireguard, addr string) (*WireguardPeer, error) {
+func NewWireguardPeer(wg *Wireguard, addr string, persistentKeepalive int) (*WireguardPeer, error) {
 	allowedIPs, err := NewAddressFromString(addr)
 	if err != nil {
 		return nil, err
 	}
 	return &WireguardPeer{
-		Wireguard:  wg,
-		AllowedIPs: allowedIPs,
+		Wireguard:           wg,
+		AllowedIPs:          allowedIPs,
+		PersistentKeepalive: persistentKeepalive,
 	}, nil
 }
 

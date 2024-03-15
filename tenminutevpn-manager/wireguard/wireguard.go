@@ -77,13 +77,13 @@ func (wg *Wireguard) ToPeer(allowedIPs *Address) *WireguardPeer {
 func (wg *Wireguard) AddPeer(client *Wireguard) error {
 	server := wg
 
-	clientPeer, err := NewWireguardPeer(client, client.Address.String())
+	clientPeer, err := NewWireguardPeer(client, client.Address.String(), 0)
 	if err != nil {
 		return fmt.Errorf("failed to create peer (server -> client): %w", err)
 	}
 	server.Peers = append(server.Peers, clientPeer)
 
-	serverPeer, err := NewWireguardPeer(server, "0.0.0.0/0")
+	serverPeer, err := NewWireguardPeer(server, "0.0.0.0/0", 25)
 	if err != nil {
 		return fmt.Errorf("failed to create peer (client -> server): %w", err)
 	}
