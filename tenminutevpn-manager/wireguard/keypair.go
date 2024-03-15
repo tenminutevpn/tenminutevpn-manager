@@ -20,6 +20,10 @@ func (kp *KeyPair) WritePublicKey(filename string) error {
 }
 
 func NewKeyPair(privateKey string) (*KeyPair, error) {
+	if privateKey == "" {
+		return nil, fmt.Errorf("private key cannot be empty")
+	}
+
 	publicKey, err := GeneratePublicKey(privateKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate public key: %w", err)
