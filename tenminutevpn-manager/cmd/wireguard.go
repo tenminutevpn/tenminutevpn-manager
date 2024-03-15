@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"net"
 
 	"github.com/spf13/cobra"
 	"github.com/tenminutevpn/tenminutevpn-manager/network"
@@ -11,19 +10,13 @@ import (
 )
 
 func wireguardSetup(wgName string, wgAddress string, wgPort int) {
-	ip, ipNet, err := net.ParseCIDR(wgAddress)
-	if err != nil {
-		log.Fatalf("failed to parse CIDR: %s", err.Error())
-		return
-	}
-
 	iface, err := network.GetDefaultInterface()
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	wg, err := wireguard.NewWireguard(wgName, iface, ip, ipNet, wgPort)
+	wg, err := wireguard.NewWireguard(wgName, iface, wgAddress, wgPort)
 	if err != nil {
 		log.Fatalf("failed to create wireguard: %s", err.Error())
 		return
