@@ -10,8 +10,8 @@ VERSION ?= $(shell git describe --tags --abbrev=0)
 VERSION := $(shell echo $(VERSION) | sed -e 's/^v//')
 REVISION ?= $(shell git rev-parse --short HEAD)$(shell git diff --quiet || echo -dirty)
 
-.PHONY: build
-build-%: ## Build the Debian package
+.PHONY: build-%
+build-%: ## Build the Debian package for the given architecture
 	mkdir -p $(MAKEFILE_DIR)/dist/usr/bin
 
 	cd $(MAKEFILE_DIR)/tenminutevpn-manager && \
@@ -21,11 +21,14 @@ build-%: ## Build the Debian package
 
 	chmod +x $(MAKEFILE_DIR)/dist/usr/bin/tenminutevpn-manager
 	export ARCH=$* && \
-    	export VERSION=$(VERSION) && \
+		export VERSION=$(VERSION) && \
 		export REVISION=$(REVISION) && \
 		envsubst < $(MAKEFILE_DIR)/dist/DEBIAN/control.template > $(MAKEFILE_DIR)/dist/DEBIAN/control
-	dpkg-deb --build --root-owner-group $(MAKEFILE_DIR)/dist $(MAKEFILE_DIR)/tenminutevpn-$(VERSION)-$(REVISION).deb
+	dpkg-deb --build --root-owner-group $(MAKEFILE_DIR)/dist $(MAKEFILE_DIR)/tenminutevpn-$(VERSION)-$(REVISION)-$*.deb
 	sha256sum *.deb > SHA256SUMS
+
+.PHONY: build
+build: build-amd64 build-arm64 ## Build the Debian packages for all architectures
 
 .PHONY: shell
 shell: ## Start the shell (devcontainer)
