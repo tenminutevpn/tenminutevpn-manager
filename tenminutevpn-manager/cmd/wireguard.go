@@ -8,40 +8,47 @@ import (
 	"github.com/tenminutevpn/tenminutevpn-manager/wireguard"
 )
 
-func wireguardSetup() {
+func wireguardSetup(configPath, peerPath string) {
 	iface, err := network.GetDefaultInterface()
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	server, err := wireguard.NewWireguard("wg0", iface, "100.96.0.1/24", 51820)
+	wg, err := wireguard.NewWireguard("wg0", iface, "100.96.0.1/24", 51820)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	peer1, err := wireguard.NewWireguard("peer-1", "", "100.96.0.2/32", 0)
+	peer, err := wireguard.NewWireguard("peer-1", "", "100.96.0.2/32", 0)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	server.AddPeer(peer1)
+	wg.AddPeer(peer)
 
-	err = server.Write("/tmp/wg0.conf")
+	err = wg.Write(configPath)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
+	err = peer.Write(peerPath)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 }
 
 var wireguardSetupCmd = &cobra.Command{
 	Use:   "setup",
 	Short: "Setup WireGuard Interface",
 	Run: func(cmd *cobra.Command, args []string) {
-		wireguardSetup()
+		configPath := cmd.Flag("config").Value.String()
+		peerPath := cmd.Flag("peer").Value.String()
+		wireguardSetup(configPath, peerPath)
 	},
 }
 
@@ -51,7 +58,9 @@ var wireguardCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(wireguardCmd)
+	wireguardSetupCmd.Flags().StringP("config", "c", "/etc/wireguard/wg0.conf", "Path to WireGuard configuration file")
+	wireguardSetupCmd.Flags().StringP("peer", "p", "/etc/wireguard/peer-1.conf", "Path to WireGuard peer configuration file")
 
 	wireguardCmd.AddCommand(wireguardSetupCmd)
+	rootCmd.AddCommand(wireguardCmd)
 }
