@@ -97,22 +97,4 @@ func (server *Wireguard) AddPeer(client *Wireguard) error {
 	client.Peers = append(client.Peers, peer)
 
 	return nil
-
-	// server := wg
-
-	// clientAllowedIPs := []string{client.Address.String()}
-	// clientPeer, err := NewWireguardPeer(client, clientAllowedIPs, 0)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to create peer (server -> client): %w", err)
-	// }
-	// server.Peers = append(server.Peers, clientPeer)
-
-	// serverAllowedIPs := []string{"::/0", "0.0.0.0/0"}
-	// serverPeer, err := NewWireguardPeer(server, serverAllowedIPs, 25)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to create peer (client -> server): %w", err)
-	// }
-	// client.Peers = append(client.Peers, serverPeer)
-
-	return nil
 }
