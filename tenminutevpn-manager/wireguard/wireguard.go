@@ -2,6 +2,7 @@ package wireguard
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/tenminutevpn/tenminutevpn-manager/network"
 )
@@ -44,29 +45,6 @@ func NewWireguard(name string, networkInterface string, addr string, port int) (
 	}, nil
 }
 
-func (wg *Wireguard) GetPublicIPv4() (string, error) {
-	ip, err := network.GetPublicIPv4()
-	if err != nil {
-		return "", fmt.Errorf("failed to get public IPv4: %w", err)
-	}
-	return ip.String(), nil
-}
-
-func (wg *Wireguard) GetConfig() *wireguardConfig {
-	return makeWireguardConfig(
-		wg.Name,
-		wg.Address.String(),
-		wg.KeyPair.PrivateKey,
-		fmt.Sprintf("%d", wg.Port),
-		wg.NetworkInterface,
-		wg.Peers,
-	)
-}
-
-func (wg *Wireguard) WriteConfig(filename string) error {
-	return wg.GetConfig().Write(filename)
-}
-
 func (server *Wireguard) AddPeer(client *Wireguard) error {
 	peer := &Peer{
 		PublicKey:  client.KeyPair.PublicKey,
@@ -84,7 +62,7 @@ func (server *Wireguard) AddPeer(client *Wireguard) error {
 		return fmt.Errorf("failed to create allowed IPv6: %w", err)
 	}
 
-	endpointIPv4, err := server.GetPublicIPv4()
+	endpointIPv4, err := network.GetPublicIPv4()
 	if err != nil {
 		return fmt.Errorf("failed to get public IPv4: %w", err)
 	}
@@ -92,9 +70,31 @@ func (server *Wireguard) AddPeer(client *Wireguard) error {
 	peer = &Peer{
 		PublicKey:  server.KeyPair.PublicKey,
 		AllowedIPs: []*Address{allowedIPv4, allowedIPv6},
-		Endpoint:   fmt.Sprintf("%s:%d", endpointIPv4, server.Port),
+		Endpoint:   fmt.Sprintf("%s:%d", endpointIPv4.String(), server.Port),
 	}
 	client.Peers = append(client.Peers, peer)
 
 	return nil
+}
+
+func (wg *Wireguard) toTemplateData() *templateWireguardData {
+	return &templateWireguardData{
+		Name:             wg.Name,
+		PrivateKey:       wg.KeyPair.PrivateKey,
+		Address:          wg.Address.String(),
+		ListenPort:       wg.Port,
+		NetworkInterface: wg.NetworkInterface,
+		Peers:            wg.Peers,
+	}
+}
+
+func (wg *Wireguard) Render() string {
+	var output strings.Builder
+	templateWireguard.Execute(&output, wg.toTemplateData())
+	return output.String()
+}
+
+func (wg *Wireguard) Write(filename string) error {
+	data := wg.Render()
+	return writeToFile(filename, 0600, data)
 }

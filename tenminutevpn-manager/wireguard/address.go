@@ -10,13 +10,13 @@ type Address struct {
 	IPNet *net.IPNet
 }
 
-func (a *Address) Mask() int {
-	ones, _ := a.IPNet.Mask.Size()
+func (addr *Address) Mask() int {
+	ones, _ := addr.IPNet.Mask.Size()
 	return ones
 }
 
-func (a *Address) String() string {
-	return fmt.Sprintf("%s/%d", a.IP, a.Mask())
+func (addr *Address) String() string {
+	return fmt.Sprintf("%s/%d", addr.IP, addr.Mask())
 }
 
 func NewAddress(ip net.IP, ipNet *net.IPNet) *Address {
@@ -26,8 +26,8 @@ func NewAddress(ip net.IP, ipNet *net.IPNet) *Address {
 	}
 }
 
-func NewAddressFromString(address string) (*Address, error) {
-	ip, ipNet, err := net.ParseCIDR(address)
+func NewAddressFromString(addr string) (*Address, error) {
+	ip, ipNet, err := net.ParseCIDR(addr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse address: %w", err)
 	}

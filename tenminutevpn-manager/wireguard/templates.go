@@ -19,13 +19,13 @@ func getTemplate(name string) *template.Template {
 }
 
 var (
-	templatePeer   *template.Template
-	templateServer *template.Template
+	templatePeer      *template.Template
+	templateWireguard *template.Template
 )
 
 func init() {
 	templatePeer = getTemplate("peer.conf")
-	templateServer = getTemplate("server.conf")
+	templateWireguard = getTemplate("wireguard.conf")
 }
 
 type templatePeerData struct {
@@ -36,4 +36,11 @@ type templatePeerData struct {
 	PresharedKey        string
 }
 
-type templateServerData struct{}
+type templateWireguardData struct {
+	Name             string
+	PrivateKey       string
+	Address          string
+	ListenPort       int
+	NetworkInterface string
+	Peers            []*Peer
+}
