@@ -25,7 +25,7 @@ build-%: ## Build the Debian package for the given architecture
 		export REVISION=$(REVISION) && \
 		envsubst < $(MAKEFILE_DIR)/dist/DEBIAN/control.template > $(MAKEFILE_DIR)/dist/DEBIAN/control
 	dpkg-deb --build --root-owner-group $(MAKEFILE_DIR)/dist $(MAKEFILE_DIR)/tenminutevpn-$(VERSION)-$(REVISION)-$*.deb
-	sha256sum *.deb > SHA256SUMS
+	sha256sum *.deb >> SHA256SUMS
 
 .PHONY: build
 build: build-amd64 build-arm64 ## Build the Debian packages for all architectures
