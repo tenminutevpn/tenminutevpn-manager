@@ -2,24 +2,7 @@ package wireguard
 
 import (
 	"strings"
-	"text/template"
 )
-
-const configTemplate = `[Interface]
-# Name = {{ .Name }}
-PrivateKey = {{ .PrivateKey }}
-Address = {{ .Address }}
-
-{{- if ne .ListenPort "0" }}
-ListenPort = {{ .ListenPort }}
-PostUp = iptables -A FORWARD -i {{ .Name }} -j ACCEPT; iptables -t nat -A POSTROUTING -o {{ .NetworkInterface }} -j MASQUERADE
-PostDown = iptables -D FORWARD -i {{ .Name }} -j ACCEPT; iptables -t nat -D POSTROUTING -o {{ .NetworkInterface }} -j MASQUERADE
-{{- end }}
-
-{{- range .Peers }}
-{{ .Render }}
-{{- end }}
-`
 
 type wireguardConfig struct {
 	Name             string
@@ -42,7 +25,11 @@ func makeWireguardConfig(name, address, privateKey, listenPort, networkInterface
 }
 
 func (cfg *wireguardConfig) Render() string {
-	tpl := template.Must(template.New("serverConfig").Parse(configTemplate))
+	tpl, err := getTemplate("server.conf")
+	if err != nil {
+		panic(err)
+	}
+
 	var output strings.Builder
 	tpl.Execute(&output, cfg)
 	return output.String()

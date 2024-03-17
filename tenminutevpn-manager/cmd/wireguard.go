@@ -29,7 +29,7 @@ func wireguardSetup() {
 
 	server.AddPeer(peer1)
 
-	err = peer1.WriteConfig("/tmp/wg0.conf")
+	err = server.WriteConfig("/tmp/wg0.conf")
 	if err != nil {
 		log.Fatal(err)
 		return
