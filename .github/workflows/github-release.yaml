@@ -30,7 +30,7 @@ jobs:
           fi
 
       - name: Build
-        run: make build VERSION=${{ steps.version.outputs.VERSION }} REVISION=${{ steps.version.outputs.REVISION }}
+        run: make build-amd64 VERSION=${{ steps.version.outputs.VERSION }} REVISION=${{ steps.version.outputs.REVISION }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
