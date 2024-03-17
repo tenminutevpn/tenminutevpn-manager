@@ -10,10 +10,10 @@ type wireguardConfig struct {
 	PrivateKey       string
 	ListenPort       string
 	NetworkInterface string
-	Peers            []*WireguardPeer
+	Peers            []*Peer
 }
 
-func makeWireguardConfig(name, address, privateKey, listenPort, networkInterface string, peers []*WireguardPeer) *wireguardConfig {
+func makeWireguardConfig(name, address, privateKey, listenPort, networkInterface string, peers []*Peer) *wireguardConfig {
 	return &wireguardConfig{
 		Name:             name,
 		Address:          address,

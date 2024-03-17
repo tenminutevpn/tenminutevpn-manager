@@ -14,7 +14,7 @@ type Wireguard struct {
 	Address          *Address
 	Port             int
 
-	Peers []*WireguardPeer
+	Peers []*Peer
 }
 
 func NewWireguard(name string, networkInterface string, addr string, port int) (*Wireguard, error) {
@@ -44,12 +44,12 @@ func NewWireguard(name string, networkInterface string, addr string, port int) (
 	}, nil
 }
 
-func (wg *Wireguard) GetPublicIPv4() string {
+func (wg *Wireguard) GetPublicIPv4() (string, error) {
 	ip, err := network.GetPublicIPv4()
 	if err != nil {
-		return ""
+		return "", fmt.Errorf("failed to get public IPv4: %w", err)
 	}
-	return ip.String()
+	return ip.String(), nil
 }
 
 func (wg *Wireguard) GetConfig() *wireguardConfig {
@@ -67,29 +67,52 @@ func (wg *Wireguard) WriteConfig(filename string) error {
 	return wg.GetConfig().Write(filename)
 }
 
-func (wg *Wireguard) ToPeer(allowedIPs []*Address) *WireguardPeer {
-	return &WireguardPeer{
-		Wireguard:  wg,
-		AllowedIPs: allowedIPs,
+func (server *Wireguard) AddPeer(client *Wireguard) error {
+	peer := &Peer{
+		PublicKey:  client.KeyPair.PublicKey,
+		AllowedIPs: []*Address{client.Address},
 	}
-}
+	server.Peers = append(server.Peers, peer)
 
-func (wg *Wireguard) AddPeer(client *Wireguard) error {
-	server := wg
-
-	clientAllowedIPs := []string{client.Address.String()}
-	clientPeer, err := NewWireguardPeer(client, clientAllowedIPs, 0)
+	allowedIPv4, err := NewAddressFromString("0.0.0.0/0")
 	if err != nil {
-		return fmt.Errorf("failed to create peer (server -> client): %w", err)
+		return fmt.Errorf("failed to create allowed IPv4: %w", err)
 	}
-	server.Peers = append(server.Peers, clientPeer)
 
-	serverAllowedIPs := []string{"::/0", "0.0.0.0/0"}
-	serverPeer, err := NewWireguardPeer(server, serverAllowedIPs, 25)
+	allowedIPv6, err := NewAddressFromString("::/0")
 	if err != nil {
-		return fmt.Errorf("failed to create peer (client -> server): %w", err)
+		return fmt.Errorf("failed to create allowed IPv6: %w", err)
 	}
-	client.Peers = append(client.Peers, serverPeer)
+
+	endpointIPv4, err := server.GetPublicIPv4()
+	if err != nil {
+		return fmt.Errorf("failed to get public IPv4: %w", err)
+	}
+
+	peer = &Peer{
+		PublicKey:  server.KeyPair.PublicKey,
+		AllowedIPs: []*Address{allowedIPv4, allowedIPv6},
+		Endpoint:   fmt.Sprintf("%s:%d", endpointIPv4, server.Port),
+	}
+	client.Peers = append(client.Peers, peer)
+
+	return nil
+
+	// server := wg
+
+	// clientAllowedIPs := []string{client.Address.String()}
+	// clientPeer, err := NewWireguardPeer(client, clientAllowedIPs, 0)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to create peer (server -> client): %w", err)
+	// }
+	// server.Peers = append(server.Peers, clientPeer)
+
+	// serverAllowedIPs := []string{"::/0", "0.0.0.0/0"}
+	// serverPeer, err := NewWireguardPeer(server, serverAllowedIPs, 25)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to create peer (client -> server): %w", err)
+	// }
+	// client.Peers = append(client.Peers, serverPeer)
 
 	return nil
 }

@@ -19,11 +19,21 @@ func getTemplate(name string) *template.Template {
 }
 
 var (
+	templatePeer   *template.Template
 	templateServer *template.Template
-	templateClient *template.Template
 )
 
 func init() {
+	templatePeer = getTemplate("peer.conf")
 	templateServer = getTemplate("server.conf")
-	templateClient = getTemplate("client.conf")
 }
+
+type templatePeerData struct {
+	PublicKey           string
+	AllowedIPs          string
+	Endpoint            string
+	PersistentKeepalive int
+	PresharedKey        string
+}
+
+type templateServerData struct{}
