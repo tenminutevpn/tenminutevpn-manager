@@ -21,7 +21,7 @@ func wireguardSetup(configPath, peerPath string) {
 		return
 	}
 
-	peer, err := wireguard.NewWireguard("peer-1", "", "100.96.0.2/32", 0)
+	peer, err := wireguard.NewWireguard("peer1", "", "100.96.0.2/32", 0)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -36,6 +36,18 @@ func wireguardSetup(configPath, peerPath string) {
 	}
 
 	err = peer.Write(peerPath)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	err = wg.StartService()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	err = wg.EnableService()
 	if err != nil {
 		log.Fatal(err)
 		return
