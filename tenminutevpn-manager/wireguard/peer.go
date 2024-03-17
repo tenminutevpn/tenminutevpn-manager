@@ -2,15 +2,7 @@ package wireguard
 
 import (
 	"strings"
-	"text/template"
 )
-
-const peerTemplate = `[Peer]
-PublicKey = {{ .Wireguard.KeyPair.PublicKey }}
-AllowedIPs = {{ range .AllowedIPs }}{{ .String }}, {{ end }}
-{{ if ne .Wireguard.Port 0 }}Endpoint = {{ .Wireguard.GetPublicIPv4 }}:{{ .Wireguard.Port }}{{ end }}
-{{ if ne .PersistentKeepalive 0 }}PersistentKeepalive = {{ .PersistentKeepalive }}{{ end }}
-`
 
 type WireguardPeer struct {
 	Wireguard           *Wireguard
@@ -37,8 +29,7 @@ func NewWireguardPeer(wg *Wireguard, addrs []string, persistentKeepalive int) (*
 }
 
 func (p *WireguardPeer) Render() string {
-	tpl := template.Must(template.New("peerConfig").Parse(peerTemplate))
 	var output strings.Builder
-	tpl.Execute(&output, p)
+	templateClient.Execute(&output, p)
 	return output.String()
 }

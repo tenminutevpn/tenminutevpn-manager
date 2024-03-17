@@ -25,13 +25,8 @@ func makeWireguardConfig(name, address, privateKey, listenPort, networkInterface
 }
 
 func (cfg *wireguardConfig) Render() string {
-	tpl, err := getTemplate("server.conf")
-	if err != nil {
-		panic(err)
-	}
-
 	var output strings.Builder
-	tpl.Execute(&output, cfg)
+	templateServer.Execute(&output, cfg)
 	return output.String()
 }
 
