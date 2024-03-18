@@ -10,13 +10,9 @@ func writeToFile(filename string, mode os.FileMode, data string) error {
 		return fmt.Errorf("filename is empty")
 	}
 
-	if _, err := os.Stat(filename); err == nil {
-		return fmt.Errorf("file already exists: %s", filename)
-	}
-
-	file, err := os.Create(filename)
+	file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, mode)
 	if err != nil {
-		return fmt.Errorf("failed to create file: %w", err)
+		return fmt.Errorf("failed to open file: %w", err)
 	}
 	defer file.Close()
 
