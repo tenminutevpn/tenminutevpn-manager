@@ -24,7 +24,7 @@ build-%: ## Build binary
 	chmod +x $(MAKEFILE_DIR)/tenminutevpn-manager-linux-$*
 
 .PHONY: package-%
-package-%: build-% ## Build the Debian package for the given architecture
+package-%: ## Build the Debian package for the given architecture
 	mkdir -p $(MAKEFILE_DIR)/dist/usr/bin
 	cp $(MAKEFILE_DIR)/tenminutevpn-manager-linux-$* $(MAKEFILE_DIR)/dist/usr/bin/tenminutevpn-manager
 
