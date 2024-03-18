@@ -1,4 +1,4 @@
-FROM debian:12-slim
+FROM golang:1.22.1-bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
