@@ -8,6 +8,7 @@ import (
 
 func setup() {
 	fmt.Println("Setting up TenMinuteVPN")
+	wireguardSetup("/etc/wireguard/wg0.conf", "/etc/wireguard/peer-1.conf")
 }
 
 var setupCmd = &cobra.Command{
