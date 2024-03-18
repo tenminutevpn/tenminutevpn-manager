@@ -35,7 +35,8 @@ package-%: build-% ## Build the Debian package for the given architecture
 	dpkg-deb --build --root-owner-group $(MAKEFILE_DIR)/dist $(MAKEFILE_DIR)/tenminutevpn-$(VERSION)-$(REVISION)-$*.deb
 
 SHA256SUMS:
-	sha256sum *-$(VERSION)-$(REVISION)-*.deb > SHA256SUMS
+	sha256sum tenminutevpn-manager-*-* > SHA256SUMS
+	sha256sum tenminutevpn-$(VERSION)-$(REVISION)-*.deb >> SHA256SUMS
 
 .PHONY: checksum
 checksum: SHA256SUMS ## Generate the checksums
