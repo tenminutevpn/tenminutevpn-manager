@@ -9,10 +9,7 @@ import (
 )
 
 //go:embed templates
-var (
-	templates     embed.FS
-	templateSquid *template.Template
-)
+var templates embed.FS
 
 func getTemplate(name string) *template.Template {
 	tpl, err := fs.ReadFile(templates, fmt.Sprintf("templates/%s.tpl", name))
@@ -21,6 +18,10 @@ func getTemplate(name string) *template.Template {
 	}
 	return template.Must(template.New(name).Parse(string(tpl)))
 }
+
+var (
+	templateSquid *template.Template
+)
 
 func init() {
 	templateSquid = getTemplate("squid.conf")

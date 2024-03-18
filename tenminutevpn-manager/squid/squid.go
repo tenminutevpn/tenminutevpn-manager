@@ -19,3 +19,7 @@ func (s *Squid) SystemdService() *systemd.Service {
 func (s *Squid) Render() string {
 	return makeTemplateSquidData(s).Render()
 }
+
+func (s *Squid) Write(path string) error {
+	return writeToFile(path, 0644, s.Render())
+}
