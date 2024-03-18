@@ -2,3 +2,4 @@ dist/DEBIAN/control
 dist/usr/bin/*
 *.deb
 SHA256SUMS
+tenminutevpn-manager-*-*

@@ -1,4 +1,4 @@
-name: Packer - Release
+name: TenMinuteVPN - Release
 
 on:
   pull_request:
@@ -14,11 +14,40 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.22.x
+
+      - name: Build
+        run: |
+          make build-amd64 build-arm64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary
+          path: |
+            tenminutevpn-manager-linux-*
+
+  package:
+    runs-on: ubuntu-22.04
+    needs: [build]
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: binary
 
       - name: Parse version
         id: version
@@ -31,7 +60,8 @@ jobs:
           fi
 
       - name: Build
-        run: make build VERSION=${{ steps.version.outputs.VERSION }} REVISION=${{ steps.version.outputs.REVISION }}
+        run: |
+          make package checksum VERSION=${{ steps.version.outputs.VERSION }} REVISION=${{ steps.version.outputs.REVISION }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -43,7 +73,7 @@ jobs:
 
   release:
     runs-on: ubuntu-22.04
-    needs: [build]
+    needs: [package]
     if: startsWith(github.ref, 'refs/tags/v')
 
     permissions:
@@ -57,6 +87,10 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
+          name: binary
+
+      - uses: actions/download-artifact@v4
+        with:
           name: package
 
       - name: Release
@@ -65,5 +99,6 @@ jobs:
           prerelease: ${{ steps.prerelease.outputs.PRERELEASE }}
           generate_release_notes: true
           files: |
+            tenminutevpn-manager-linux-*
             *.deb
             SHA256SUMS
