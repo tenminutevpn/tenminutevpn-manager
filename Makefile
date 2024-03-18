@@ -18,8 +18,8 @@ build-%: ## Build the Debian package for the given architecture
 		GOOS=linux \
 		GOARCH=$* \
 	go build -o $(MAKEFILE_DIR)/dist/usr/bin/tenminutevpn-manager .
-
 	chmod +x $(MAKEFILE_DIR)/dist/usr/bin/tenminutevpn-manager
+
 	export ARCH=$* && \
 		export VERSION=$(VERSION) && \
 		export REVISION=$(REVISION) && \
