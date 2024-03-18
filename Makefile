@@ -20,13 +20,13 @@ build-%: ## Build binary
 		export GOOS=linux && \
 		export GOARCH=$* && \
 		go get -d -v && \
-		go build .
-	chmod +x $(MAKEFILE_DIR)/tenminutevpn-manager
+		go build -o $(MAKEFILE_DIR)/tenminutevpn-manager-linux-$* .
+	chmod +x $(MAKEFILE_DIR)/tenminutevpn-manager-linux-$*
 
 .PHONY: package-%
 package-%: build-% ## Build the Debian package for the given architecture
 	mkdir -p $(MAKEFILE_DIR)/dist/usr/bin
-	cp $(MAKEFILE_DIR)/tenminutevpn-manager/tenminutevpn-manager $(MAKEFILE_DIR)/dist/usr/bin
+	cp $(MAKEFILE_DIR)/tenminutevpn-manager-linux-$* $(MAKEFILE_DIR)/dist/usr/bin/tenminutevpn-manager
 
 	export ARCH=$* && \
 		export VERSION=$(VERSION) && \
@@ -37,8 +37,11 @@ package-%: build-% ## Build the Debian package for the given architecture
 SHA256SUMS:
 	sha256sum *-$(VERSION)-$(REVISION)-*.deb > SHA256SUMS
 
+.PHONY: checksum
+checksum: SHA256SUMS ## Generate the checksums
+
 .PHONY: package
-package: package-amd64 package-arm64 SHA256SUMS ## Build the Debian packages for all architectures
+package: package-amd64 package-arm64 ## Build the Debian packages for all architectures
 
 .PHONY: shell
 shell: ## Start the shell (devcontainer)
