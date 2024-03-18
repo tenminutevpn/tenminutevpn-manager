@@ -27,6 +27,7 @@ build-%: ## Build binary
 package-%: ## Build the Debian package for the given architecture
 	mkdir -p $(MAKEFILE_DIR)/dist/usr/bin
 	cp $(MAKEFILE_DIR)/tenminutevpn-manager-linux-$* $(MAKEFILE_DIR)/dist/usr/bin/tenminutevpn-manager
+	chmod +x $(MAKEFILE_DIR)/dist/usr/bin/tenminutevpn-manager
 
 	export ARCH=$* && \
 		export VERSION=$(VERSION) && \
