@@ -1,4 +1,4 @@
-Package: tenminutevpn
+Package: tenminutevpn-manager
 Version: ${VERSION}-${REVISION}
 Section: base
 Priority: optional

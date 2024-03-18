@@ -32,11 +32,11 @@ package-%: ## Build the Debian package for the given architecture
 		export VERSION=$(VERSION) && \
 		export REVISION=$(REVISION) && \
 		envsubst < $(MAKEFILE_DIR)/dist/DEBIAN/control.template > $(MAKEFILE_DIR)/dist/DEBIAN/control
-	dpkg-deb --build --root-owner-group $(MAKEFILE_DIR)/dist $(MAKEFILE_DIR)/tenminutevpn-$(VERSION)-$(REVISION)-$*.deb
+	dpkg-deb --build --root-owner-group $(MAKEFILE_DIR)/dist $(MAKEFILE_DIR)/tenminutevpn-manager-$(VERSION)-$(REVISION)-$*.deb
 
 SHA256SUMS:
-	sha256sum tenminutevpn-manager-*-* > SHA256SUMS
-	sha256sum tenminutevpn-$(VERSION)-$(REVISION)-*.deb >> SHA256SUMS
+	sha256sum tenminutevpn-manager-linux-* > SHA256SUMS
+	sha256sum tenminutevpn-manager-$(VERSION)-$(REVISION)-*.deb >> SHA256SUMS
 
 .PHONY: checksum
 checksum: SHA256SUMS ## Generate the checksums
