@@ -19,9 +19,6 @@ func (s *Service) Enable() error {
 	if err != nil {
 		return fmt.Errorf("failed to enable %s: %w: %s", s.Name, err, string(out))
 	}
-	if len(out) > 0 {
-		return fmt.Errorf("failed to enable %s: %s", s.Name, string(out))
-	}
 	return nil
 }
 
@@ -31,9 +28,6 @@ func (s *Service) Start() error {
 	if err != nil {
 		return fmt.Errorf("failed to start %s: %w: %s", s.Name, err, string(out))
 	}
-	if len(out) > 0 {
-		return fmt.Errorf("failed to start %s: %s", s.Name, string(out))
-	}
 	return nil
 }
 
@@ -42,9 +36,6 @@ func (s *Service) Stop() error {
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to stop %s: %w: %s", s.Name, err, string(out))
-	}
-	if len(out) > 0 {
-		return fmt.Errorf("failed to stop %s: %s", s.Name, string(out))
 	}
 	return nil
 }
