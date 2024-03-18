@@ -9,9 +9,22 @@ import (
 
 func squidSetup(port int) {
 	s := squid.NewSquid(port)
+
 	err := s.Write("/etc/squid/squid.conf")
 	if err != nil {
 		log.Fatalf("Error writing squid config: %s", err)
+		return
+	}
+
+	err = s.SystemdService().Enable()
+	if err != nil {
+		log.Fatalf("Error enabling squid service: %s", err)
+		return
+	}
+
+	err = s.SystemdService().Start()
+	if err != nil {
+		log.Fatalf("Error starting squid service: %s", err)
 		return
 	}
 }
