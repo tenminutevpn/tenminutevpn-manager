@@ -2,10 +2,10 @@ package wireguard
 
 import (
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/tenminutevpn/tenminutevpn-manager/network"
+	"github.com/tenminutevpn/tenminutevpn-manager/systemd"
 )
 
 type Wireguard struct {
@@ -100,26 +100,6 @@ func (wg *Wireguard) Write(filename string) error {
 	return writeToFile(filename, 0600, data)
 }
 
-func (wg *Wireguard) StartService() error {
-	cmd := exec.Command("systemctl", "start", fmt.Sprintf("wg-quick@%s", wg.Name))
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("failed to start wireguard service: %w", err)
-	}
-	if len(out) > 0 {
-		return fmt.Errorf("failed to start wireguard service: %s", string(out))
-	}
-	return nil
-}
-
-func (wg *Wireguard) EnableService() error {
-	cmd := exec.Command("systemctl", "enable", fmt.Sprintf("wg-quick@%s", wg.Name))
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("failed to enable wireguard service: %w", err)
-	}
-	if len(out) > 0 {
-		return fmt.Errorf("failed to enable wireguard service: %s", string(out))
-	}
-	return nil
+func (wg *Wireguard) SystemdService() *systemd.Service {
+	return systemd.NewService(fmt.Sprintf("wg-quick@%s", wg.Name))
 }
