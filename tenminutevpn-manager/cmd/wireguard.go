@@ -41,13 +41,13 @@ func wireguardSetup(configPath, peerPath string) {
 		return
 	}
 
-	err = wg.StartService()
+	err = wg.SystemdService().Enable()
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	err = wg.EnableService()
+	err = wg.SystemdService().Start()
 	if err != nil {
 		log.Fatal(err)
 		return
