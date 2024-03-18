@@ -1,4 +1,4 @@
-name: Packer - Release
+name: TenMinuteVPN - Release
 
 on:
   pull_request:
