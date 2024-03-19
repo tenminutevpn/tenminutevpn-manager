@@ -52,6 +52,12 @@ func makeTemplatePeerData(p *Peer) *templatePeerData {
 	}
 }
 
+func (t *templatePeerData) Render() string {
+	var output strings.Builder
+	templatePeer.Execute(&output, t)
+	return output.String()
+}
+
 type templateWireguardData struct {
 	Name             string
 	PrivateKey       string
@@ -76,4 +82,10 @@ func makeTemplateWireguardData(wg *Wireguard) *templateWireguardData {
 		DNS:              strings.Join(dns, ", "),
 		Peers:            wg.Peers,
 	}
+}
+
+func (t *templateWireguardData) Render() string {
+	var output strings.Builder
+	templateWireguard.Execute(&output, t)
+	return output.String()
 }

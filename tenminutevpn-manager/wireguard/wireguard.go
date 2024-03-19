@@ -3,7 +3,6 @@ package wireguard
 import (
 	"fmt"
 	"net"
-	"strings"
 
 	"github.com/tenminutevpn/tenminutevpn-manager/network"
 	"github.com/tenminutevpn/tenminutevpn-manager/systemd"
@@ -89,9 +88,7 @@ func (server *Wireguard) AddPeer(client *Wireguard) error {
 }
 
 func (wg *Wireguard) Render() string {
-	var output strings.Builder
-	templateWireguard.Execute(&output, makeTemplateWireguardData(wg))
-	return output.String()
+	return makeTemplateWireguardData(wg).Render()
 }
 
 func (wg *Wireguard) Write(filename string) error {
