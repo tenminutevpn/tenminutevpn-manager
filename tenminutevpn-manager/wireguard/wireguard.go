@@ -88,25 +88,9 @@ func (server *Wireguard) AddPeer(client *Wireguard) error {
 	return nil
 }
 
-func (wg *Wireguard) toTemplateData() *templateWireguardData {
-	dns := make([]string, len(wg.DNS))
-	for i, ip := range wg.DNS {
-		dns[i] = ip.String()
-	}
-	return &templateWireguardData{
-		Name:             wg.Name,
-		PrivateKey:       wg.KeyPair.PrivateKey,
-		Address:          wg.Address.String(),
-		ListenPort:       wg.Port,
-		NetworkInterface: wg.NetworkInterface,
-		DNS:              strings.Join(dns, ", "),
-		Peers:            wg.Peers,
-	}
-}
-
 func (wg *Wireguard) Render() string {
 	var output strings.Builder
-	templateWireguard.Execute(&output, wg.toTemplateData())
+	templateWireguard.Execute(&output, makeTemplateWireguardData(wg))
 	return output.String()
 }
 

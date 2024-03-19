@@ -61,3 +61,19 @@ type templateWireguardData struct {
 	DNS              string
 	Peers            []*Peer
 }
+
+func makeTemplateWireguardData(wg *Wireguard) *templateWireguardData {
+	dns := make([]string, len(wg.DNS))
+	for i, ip := range wg.DNS {
+		dns[i] = ip.String()
+	}
+	return &templateWireguardData{
+		Name:             wg.Name,
+		PrivateKey:       wg.KeyPair.PrivateKey,
+		Address:          wg.Address.String(),
+		ListenPort:       wg.Port,
+		NetworkInterface: wg.NetworkInterface,
+		DNS:              strings.Join(dns, ", "),
+		Peers:            wg.Peers,
+	}
+}
