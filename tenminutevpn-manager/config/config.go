@@ -7,7 +7,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Define your structs
 type Metadata struct {
 	Name string `yaml:"name"`
 }
@@ -40,9 +39,7 @@ type Config struct {
 	Spec     interface{} `yaml:"spec"`
 }
 
-// parseConfigs reads and parses all YAML documents from the file
 func ParseConfig() ([]*Config, error) {
-	// Open the file
 	file, err := os.Open("config/config-2.yaml")
 	if err != nil {
 		return nil, err
