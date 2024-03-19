@@ -2,6 +2,7 @@ package wireguard
 
 import (
 	"fmt"
+	"net"
 	"strings"
 
 	"github.com/tenminutevpn/tenminutevpn-manager/network"
@@ -15,6 +16,8 @@ type Wireguard struct {
 	NetworkInterface string
 	Address          *Address
 	Port             int
+
+	DNS []net.IP
 
 	Peers []*Peer
 }
@@ -35,11 +38,18 @@ func NewWireguard(name string, networkInterface string, addr string, port int) (
 		return nil, err
 	}
 
+	dns := []net.IP{
+		net.ParseIP("1.1.1.1"),
+		net.ParseIP("1.0.0.1"),
+	}
+
 	return &Wireguard{
 		Name:    name,
 		KeyPair: keyPair,
 
 		NetworkInterface: networkInterface,
+
+		DNS: dns,
 
 		Address: address,
 		Port:    port,
@@ -79,12 +89,17 @@ func (server *Wireguard) AddPeer(client *Wireguard) error {
 }
 
 func (wg *Wireguard) toTemplateData() *templateWireguardData {
+	dns := make([]string, len(wg.DNS))
+	for i, ip := range wg.DNS {
+		dns[i] = ip.String()
+	}
 	return &templateWireguardData{
 		Name:             wg.Name,
 		PrivateKey:       wg.KeyPair.PrivateKey,
 		Address:          wg.Address.String(),
 		ListenPort:       wg.Port,
 		NetworkInterface: wg.NetworkInterface,
+		DNS:              strings.Join(dns, ", "),
 		Peers:            wg.Peers,
 	}
 }

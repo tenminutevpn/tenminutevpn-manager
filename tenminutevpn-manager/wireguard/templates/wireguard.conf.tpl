@@ -1,6 +1,9 @@
 [Interface]
 PrivateKey = {{ .PrivateKey }}
 Address = {{ .Address }}
+{{- if .DNS }}
+DNS = {{ .DNS }}
+{{- end }}
 {{- if ne .ListenPort 0 }}
 ListenPort = {{ .ListenPort }}
 PostUp = iptables -A FORWARD -i {{ .Name }} -j ACCEPT; iptables -t nat -A POSTROUTING -o {{ .NetworkInterface }} -j MASQUERADE

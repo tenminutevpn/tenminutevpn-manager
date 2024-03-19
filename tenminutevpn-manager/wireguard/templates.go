@@ -42,5 +42,6 @@ type templateWireguardData struct {
 	Address          string
 	ListenPort       int
 	NetworkInterface string
+	DNS              string
 	Peers            []*Peer
 }
