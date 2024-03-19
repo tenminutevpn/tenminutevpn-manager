@@ -32,6 +32,7 @@ upstreams:
   - name: wg0
     kind: wireguard
     spec:
+      privateKey: "privateKey111"
       peers:
         - name: peer1
           publicKey: "publicKey1"
