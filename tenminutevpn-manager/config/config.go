@@ -7,67 +7,90 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Config struct {
-	Listeners []Listener `yaml:"listeners"`
-	Upstreams []Upstream `yaml:"upstreams"`
+// Define your structs
+type Metadata struct {
+	Name string `yaml:"name"`
 }
 
-type Listener struct {
-	Name     string `yaml:"name"`
-	Bind     Bind   `yaml:"bind"`
-	Upstream string `yaml:"upstream"`
-}
-
-type Bind struct {
+type Socket struct {
 	Protocol string `yaml:"protocol"`
 	Address  string `yaml:"address"`
 	Port     int    `yaml:"port"`
 }
 
-type Upstream struct {
-	Name string `yaml:"name"`
-	Kind string `yaml:"kind"`
-	Spec any    `yaml:"spec"`
+type Peer struct {
+	Name      string `yaml:"name"`
+	PublicKey string `yaml:"publicKey"`
 }
 
 type WireguardSpec struct {
+	Socket     Socket `yaml:"socket"`
 	PrivateKey string `yaml:"privateKey"`
+	Peers      []Peer `yaml:"peers"`
 }
 
-func ParseConfig() (*Config, error) {
-	data, err := os.ReadFile("config/config.yaml")
+type SquidSpec struct {
+	Socket Socket `yaml:"socket"`
+	Access string `yaml:"access"`
+}
+
+type Config struct {
+	Kind     string      `yaml:"kind"`
+	Metadata Metadata    `yaml:"metadata"`
+	Spec     interface{} `yaml:"spec"`
+}
+
+// parseConfigs reads and parses all YAML documents from the file
+func ParseConfig() ([]*Config, error) {
+	// Open the file
+	file, err := os.Open("config/config-2.yaml")
 	if err != nil {
-		return nil, fmt.Errorf("failed to read config file: %w", err)
+		return nil, err
 	}
+	defer file.Close()
 
-	var config Config
-	err = yaml.Unmarshal(data, &config)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
-	}
+	var configs []*Config
+	decoder := yaml.NewDecoder(file)
 
-	for _, upstream := range config.Upstreams {
-		switch upstream.Kind {
-		case "wireguard":
-			specBytes, err := yaml.Marshal(upstream.Spec) // Re-marshal the spec part
-			if err != nil {
-				return nil, err
+	for {
+		var config Config
+		err := decoder.Decode(&config)
+		if err != nil {
+			if err.Error() == "EOF" {
+				break
 			}
-
-			var wgSpec WireguardSpec
-			err = yaml.Unmarshal(specBytes, &wgSpec)
-			if err != nil {
-				return nil, err
-			}
-
-			fmt.Println(wgSpec.PrivateKey)
-			// config.Upstreams[i].Spec = wgSpec
-			// fmt.Println(wgSpec)
-			// default:
-			// 	return nil, fmt.Errorf("unknown upstream kind: %s", upstream.Kind)
+			return nil, err
 		}
+
+		specData, err := yaml.Marshal(config.Spec)
+		if err != nil {
+			return nil, err
+		}
+
+		switch config.Kind {
+		case "wireguard/v1":
+			var wgSpec WireguardSpec
+			err = yaml.Unmarshal(specData, &wgSpec)
+			if err != nil {
+				return nil, err
+			}
+			config.Spec = wgSpec
+		case "squid/v1":
+			var squidSpec SquidSpec
+			err = yaml.Unmarshal(specData, &squidSpec)
+			if err != nil {
+				return nil, err
+			}
+			config.Spec = squidSpec
+		default:
+			return nil, fmt.Errorf("unknown kind: %s", config.Kind)
+		}
+
+		configs = append(configs, &config)
 	}
 
-	// fmt.Println(config)
-	return nil, nil
+	for _, config := range configs {
+		fmt.Println(config)
+	}
+	return configs, nil
 }
