@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
+	"strings"
 	"text/template"
 )
 
@@ -34,6 +35,21 @@ type templatePeerData struct {
 	Endpoint            string
 	PersistentKeepalive int
 	PresharedKey        string
+}
+
+func makeTemplatePeerData(p *Peer) *templatePeerData {
+	allowedIPs := make([]string, 0, len(p.AllowedIPs))
+	for _, allowedIP := range p.AllowedIPs {
+		allowedIPs = append(allowedIPs, allowedIP.String())
+	}
+
+	return &templatePeerData{
+		PublicKey:           p.PublicKey,
+		AllowedIPs:          strings.Join(allowedIPs, ", "),
+		Endpoint:            p.Endpoint,
+		PersistentKeepalive: p.PersistentKeepalive,
+		PresharedKey:        p.PresharedKey,
+	}
 }
 
 type templateWireguardData struct {
