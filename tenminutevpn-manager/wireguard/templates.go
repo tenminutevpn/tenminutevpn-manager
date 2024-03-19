@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
+	"strings"
 	"text/template"
 )
 
@@ -36,11 +37,55 @@ type templatePeerData struct {
 	PresharedKey        string
 }
 
+func makeTemplatePeerData(p *Peer) *templatePeerData {
+	allowedIPs := make([]string, 0, len(p.AllowedIPs))
+	for _, allowedIP := range p.AllowedIPs {
+		allowedIPs = append(allowedIPs, allowedIP.String())
+	}
+
+	return &templatePeerData{
+		PublicKey:           p.PublicKey,
+		AllowedIPs:          strings.Join(allowedIPs, ", "),
+		Endpoint:            p.Endpoint,
+		PersistentKeepalive: p.PersistentKeepalive,
+		PresharedKey:        p.PresharedKey,
+	}
+}
+
+func (t *templatePeerData) Render() string {
+	var output strings.Builder
+	templatePeer.Execute(&output, t)
+	return output.String()
+}
+
 type templateWireguardData struct {
 	Name             string
 	PrivateKey       string
 	Address          string
 	ListenPort       int
 	NetworkInterface string
+	DNS              string
 	Peers            []*Peer
+}
+
+func makeTemplateWireguardData(wg *Wireguard) *templateWireguardData {
+	dns := make([]string, len(wg.DNS))
+	for i, ip := range wg.DNS {
+		dns[i] = ip.String()
+	}
+	return &templateWireguardData{
+		Name:             wg.Name,
+		PrivateKey:       wg.KeyPair.PrivateKey,
+		Address:          wg.Address.String(),
+		ListenPort:       wg.Port,
+		NetworkInterface: wg.NetworkInterface,
+		DNS:              strings.Join(dns, ", "),
+		Peers:            wg.Peers,
+	}
+}
+
+func (t *templateWireguardData) Render() string {
+	var output strings.Builder
+	templateWireguard.Execute(&output, t)
+	return output.String()
 }
