@@ -2,6 +2,7 @@ package wireguard2
 
 import (
 	"fmt"
+	"net"
 	"strings"
 	"text/template"
 
@@ -17,7 +18,8 @@ type WireGuard struct {
 	Address *network.Address `yaml:"address"`
 	Port    int              `yaml:"port"`
 
-	Peers []*Peer `yaml:"peers,omitempty"`
+	Peers []*Peer   `yaml:"peers,omitempty"`
+	DNS   []*net.IP `yaml:"dns,omitempty"`
 }
 
 var wireguardTemplate *template.Template
@@ -39,7 +41,6 @@ type wireguardTemplateData struct {
 	PrivateKey   string
 	PublicKey    string
 
-	DNS              string // TODO: This should be a list of DNS servers
 	Name             string // TODO: This should be the name of the Wireguard interface
 	NetworkInterface string // TODO: This should be the name of the network interface
 
@@ -47,6 +48,7 @@ type wireguardTemplateData struct {
 	Port    int
 
 	Peers []*Peer
+	DNS   string
 }
 
 func makeWireguardTemplateData(wireguard *WireGuard) *wireguardTemplateData {
@@ -65,6 +67,11 @@ func makeWireguardTemplateData(wireguard *WireGuard) *wireguardTemplateData {
 		publicKey = wireguard.PublicKey.String()
 	}
 
+	dns := make([]string, 0, len(wireguard.DNS))
+	for _, ip := range wireguard.DNS {
+		dns = append(dns, ip.String())
+	}
+
 	return &wireguardTemplateData{
 		PresharedKey: presharedKey,
 		PrivateKey:   privateKey,
@@ -74,6 +81,7 @@ func makeWireguardTemplateData(wireguard *WireGuard) *wireguardTemplateData {
 		Port:    wireguard.Port,
 
 		Peers: wireguard.Peers,
+		DNS:   strings.Join(dns, ", "),
 	}
 }
 

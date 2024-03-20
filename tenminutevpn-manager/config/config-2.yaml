@@ -7,6 +7,9 @@ spec:
   port: 51820
   privatekey: "WKJkDPfRVMI/IZr3KPlaigUzrMZt3/t8fGPDtNSoK1w="
   publickey: "ZzMDNv6tE4hjA6zY429BWNPnJJ1tft/1Q1R/EHCkaiU="
+  dns:
+    - 1.1.1.1
+    - 1.0.0.1
   peers:
     - publickey: "ZzMDNv6tE4hjA6zY429BWNPnJJ1tft/1Q1R/EHCkaiU="
       allowedips:
