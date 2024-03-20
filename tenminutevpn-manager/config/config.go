@@ -42,6 +42,10 @@ func ParseResources() ([]*resource.Resource, error) {
 			peer := r.Spec.Peers[0]
 			cfg := r.Spec.PeerWireguard(peer).Render()
 			fmt.Println(cfg)
+
+			// marshal the resource back to yaml
+			d, _ := yaml.Marshal(&r)
+			fmt.Println(string(d))
 		default:
 			return nil, fmt.Errorf("unknown kind: %s", res.Kind)
 		}
