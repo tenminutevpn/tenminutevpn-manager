@@ -4,17 +4,12 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/tenminutevpn/tenminutevpn-manager/network"
 	"gopkg.in/yaml.v3"
 )
 
 type Metadata struct {
 	Name string `yaml:"name"`
-}
-
-type Socket struct {
-	Protocol string `yaml:"protocol"`
-	Address  string `yaml:"address"`
-	Port     int    `yaml:"port"`
 }
 
 type Peer struct {
@@ -23,14 +18,14 @@ type Peer struct {
 }
 
 type WireguardSpec struct {
-	Socket     Socket `yaml:"socket"`
-	PrivateKey string `yaml:"privateKey"`
-	Peers      []Peer `yaml:"peers"`
+	Socket     network.Socket `yaml:"socket"`
+	PrivateKey string         `yaml:"privateKey"`
+	Peers      []Peer         `yaml:"peers"`
 }
 
 type SquidSpec struct {
-	Socket Socket `yaml:"socket"`
-	Access string `yaml:"access"`
+	Socket network.Socket `yaml:"socket"`
+	Access string         `yaml:"access"`
 }
 
 type Config struct {
@@ -40,7 +35,7 @@ type Config struct {
 }
 
 func ParseConfig() ([]*Config, error) {
-	file, err := os.Open("config/config-2.yaml")
+	file, err := os.Open("config/config.yaml")
 	if err != nil {
 		return nil, err
 	}

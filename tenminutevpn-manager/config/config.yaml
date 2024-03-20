@@ -1,55 +1,23 @@
 ---
-listeners:
-  - name: wireguard-1
-    bind:
-      protocol: udp
-      address: 0.0.0.0
-      port: 51820
-    upstream: wg0
-
-  - name: tcp-1
-    bind:
-      protocol: tcp
-      address: 0.0.0.0
-      port: 3128
-    upstream: squid
-
-  - name: tcp-2
-    bind:
-      protocol: tcp
-      address: 0.0.0.0
-      port: 1080
-    upstream: dante
-
-  - name: udp-2
-    bind:
-      protocol: udp
-      address: 0.0.0.0
-      port: 53
-    upstream: dns
-
-upstreams:
-  - name: wg0
-    kind: wireguard
-    spec:
-      privateKey: "privateKey111"
-      peers:
-        - name: peer1
-          publicKey: "publicKey1"
-
-  - name: squid
-    kind: squid
-    spec:
-      access: "allow all"
-
-  - name: dante
-    kind: dante
-    spec:
-      access: "allow all"
-
-  - name: dns
-    kind: dnsmasq
-    spec:
-      access: "allow"
-      forwarders:
-        - 1.1.1.1
+kind: wireguard/v1
+metadata:
+  name: wg0
+spec:
+  socket:
+    protocol: udp
+    address: 0.0.0.0
+    port: 51820
+  privateKey: "privateKey111"
+  peers:
+    - name: peer1
+      publicKey: "publicKey1"
+---
+kind: squid/v1
+metadata:
+  name: squid
+spec:
+  socket:
+    protocol: tcp
+    address: 0.0.0.0
+    port: 3128
+  access: "allow all"
