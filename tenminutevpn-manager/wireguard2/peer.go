@@ -88,6 +88,14 @@ func (peer *Peer) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
+	if len(peer.AllowedIPs) == 0 {
+		return fmt.Errorf("allowedips is required")
+	}
+
+	if len(peer.AllowedIPs) > 1 {
+		return fmt.Errorf("only one allowedip is allowed")
+	}
+
 	if peer.PublicKey == nil {
 		if peer.PrivateKey == nil {
 			privatekey, err := GenerateKey()
