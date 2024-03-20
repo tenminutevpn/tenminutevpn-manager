@@ -1,6 +1,7 @@
 package wireguard2
 
 import (
+	"fmt"
 	"net"
 	"strings"
 	"text/template"
@@ -11,9 +12,9 @@ import (
 )
 
 type Peer struct {
-	PresharedKey Key `yaml:"presharedkey,omitempty"`
-	PrivateKey   Key `yaml:"privateey,omitempty"`
-	PublicKey    Key `yaml:"publickey"`
+	PresharedKey *Key `yaml:"presharedkey,omitempty"`
+	PrivateKey   *Key `yaml:"privateey,omitempty"`
+	PublicKey    *Key `yaml:"publickey"`
 
 	AllowedIPs []network.IPNet `yaml:"allowedips"`
 	Endpoint   *net.UDPAddr    `yaml:"endpoint,omitempty"`
@@ -46,6 +47,13 @@ type peerTemplateData struct {
 }
 
 func makePeerTemplateData(peer *Peer) *peerTemplateData {
+	var presharedKey string
+	if peer.PresharedKey == nil {
+		presharedKey = ""
+	} else {
+		presharedKey = peer.PresharedKey.String()
+	}
+
 	allowedIPs := make([]string, 0, len(peer.AllowedIPs))
 	for _, allowedIP := range peer.AllowedIPs {
 		allowedIPs = append(allowedIPs, allowedIP.String())
@@ -59,11 +67,11 @@ func makePeerTemplateData(peer *Peer) *peerTemplateData {
 	persistentKeepalive := int(peer.PersistentKeepalive / time.Second)
 
 	return &peerTemplateData{
+		PresharedKey:        presharedKey,
 		PublicKey:           peer.PublicKey.String(),
 		AllowedIPs:          strings.Join(allowedIPs, ", "),
 		Endpoint:            endpoint,
 		PersistentKeepalive: persistentKeepalive,
-		PresharedKey:        peer.PresharedKey.String(),
 	}
 }
 
@@ -78,6 +86,10 @@ func (peer *Peer) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type P Peer
 	if err := unmarshal((*P)(peer)); err != nil {
 		return err
+	}
+
+	if peer.PublicKey == nil {
+		return fmt.Errorf("public key is required")
 	}
 
 	return nil
