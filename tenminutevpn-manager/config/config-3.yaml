@@ -11,4 +11,5 @@ spec:
   peers:
     - allowedips:
         - 100.96.0.2/32
-      persistentkeepalive: 25s
+    - allowedips:
+        - 100.86.0.3/32
