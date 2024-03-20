@@ -1,0 +1,8 @@
+---
+kind: wireguard/v1
+metadata:
+  name: wg0
+spec:
+  address: 0.0.0.0:51820
+  privateKey: "privateKeyValue"
+  publicKey: "publicKeyValue"

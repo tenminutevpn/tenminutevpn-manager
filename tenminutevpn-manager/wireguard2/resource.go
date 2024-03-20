@@ -1,4 +1,4 @@
-package wireguard
+package wireguard2
 
 import "github.com/tenminutevpn/tenminutevpn-manager/resource"
 
