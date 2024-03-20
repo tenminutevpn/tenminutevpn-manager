@@ -1,9 +1,11 @@
 package config
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/tenminutevpn/tenminutevpn-manager/resource"
+	"github.com/tenminutevpn/tenminutevpn-manager/wireguard2"
 	"gopkg.in/yaml.v3"
 )
 
@@ -26,24 +28,25 @@ func ParseResources() ([]*resource.Resource, error) {
 			return nil, err
 		}
 
-		// switch res.Kind {
-		// case "wireguard/v1":
-		// 	var wgSpec WireguardSpec
-		// 	err = yaml.Unmarshal(specData, &wgSpec)
-		// 	if err != nil {
-		// 		return nil, err
-		// 	}
-		// 	res.Spec = wgSpec
-		// case "squid/v1":
-		// 	var squidSpec SquidSpec
-		// 	err = yaml.Unmarshal(specData, &squidSpec)
-		// 	if err != nil {
-		// 		return nil, err
-		// 	}
-		// 	res.Spec = squidSpec
-		// default:
-		// 	return nil, fmt.Errorf("unknown kind: %s", res.Kind)
-		// }
+		doc, err := yaml.Marshal(&res)
+		if err != nil {
+			return nil, err
+		}
+
+		switch res.Kind {
+		case "wireguard/v1":
+			var r wireguard2.WireguardResource
+			if err := yaml.Unmarshal(doc, &r); err != nil {
+				return nil, fmt.Errorf("failed to parse wireguard resource: %w", err)
+			}
+			fmt.Printf("Parsed wireguard resource: %v\n", r)
+			fmt.Printf("Parsed wireguard resource: %+v\n", r.Spec)
+			for _, peer := range r.Spec.Peers {
+				fmt.Printf("Parsed wireguard resource peer: %+v\n", peer)
+			}
+		default:
+			return nil, fmt.Errorf("unknown kind: %s", res.Kind)
+		}
 
 		resources = append(resources, &res)
 	}

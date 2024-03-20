@@ -7,4 +7,5 @@ type Metadata struct {
 type Resource struct {
 	Kind     string   `yaml:"kind"`
 	Metadata Metadata `yaml:"metadata"`
+	Spec     any      `yaml:"spec"`
 }

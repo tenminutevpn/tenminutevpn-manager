@@ -3,7 +3,7 @@ package wireguard2
 import "github.com/tenminutevpn/tenminutevpn-manager/resource"
 
 type WireguardResource struct {
-	resource.Resource
-
-	Spec *Wireguard `yaml:"spec"`
+	Kind     string            `yaml:"kind"`
+	Metadata resource.Metadata `yaml:"metadata"`
+	Spec     *Wireguard        `yaml:"spec"`
 }
