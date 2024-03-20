@@ -35,7 +35,7 @@ func (k *Key) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-func GenerateKey() (Key, error) {
+func NewKey() (Key, error) {
 	key, err := wgtypes.GenerateKey()
 	if err != nil {
 		return Key{}, err

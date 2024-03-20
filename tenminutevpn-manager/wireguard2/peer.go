@@ -2,7 +2,6 @@ package wireguard2
 
 import (
 	"fmt"
-	"net"
 	"strings"
 	"text/template"
 	"time"
@@ -17,7 +16,7 @@ type Peer struct {
 	PublicKey    *Key `yaml:"publickey"`
 
 	AllowedIPs []network.Address `yaml:"allowedips"`
-	Endpoint   *net.UDPAddr      `yaml:"endpoint,omitempty"`
+	Endpoint   *network.Endpoint `yaml:"endpoint,omitempty"`
 
 	PersistentKeepalive time.Duration `yaml:"persistentkeepalive,omitempty"`
 }
@@ -98,7 +97,7 @@ func (peer *Peer) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	if peer.PublicKey == nil {
 		if peer.PrivateKey == nil {
-			privatekey, err := GenerateKey()
+			privatekey, err := NewKey()
 			if err != nil {
 				return fmt.Errorf("failed to generate private key: %w", err)
 			}

@@ -19,6 +19,10 @@ func (addr *Address) String() string {
 	return fmt.Sprintf("%s/%d", addr.IP, addr.Mask())
 }
 
+func (addr *Address) MarshalYAML() (interface{}, error) {
+	return addr.String(), nil
+}
+
 func (addr *Address) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var addrStr string
 	if err := unmarshal(&addrStr); err != nil {

@@ -19,6 +19,10 @@ func (endpoint *Endpoint) String() string {
 	return net.JoinHostPort(endpoint.IP.String(), fmt.Sprintf("%d", endpoint.Port))
 }
 
+func (endpoint *Endpoint) MarshalYAML() (interface{}, error) {
+	return endpoint.String(), nil
+}
+
 func (endpoint *Endpoint) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var endpointStr string
 	if err := unmarshal(&endpointStr); err != nil {
@@ -47,4 +51,11 @@ func (endpoint *Endpoint) UnmarshalYAML(unmarshal func(interface{}) error) error
 	endpoint.IP = ip
 	endpoint.Port = port
 	return nil
+}
+
+func NewEndpoint(ip net.IP, port int) *Endpoint {
+	return &Endpoint{
+		IP:   ip,
+		Port: port,
+	}
 }

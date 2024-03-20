@@ -109,7 +109,7 @@ func (wireguard *WireGuard) UnmarshalYAML(unmarshal func(interface{}) error) err
 	}
 
 	if wg.PrivateKey == nil {
-		privatekey, err := GenerateKey()
+		privatekey, err := NewKey()
 		if err != nil {
 			return fmt.Errorf("failed to generate private key: %w", err)
 		}
@@ -141,10 +141,7 @@ func (wireguard *WireGuard) PeerWireguard(client *Peer) *WireGuard {
 		panic(err)
 	}
 
-	udpAddr := &net.UDPAddr{
-		IP:   ip,
-		Port: wireguard.Port,
-	}
+	endpoint := network.NewEndpoint(ip, wireguard.Port)
 
 	allowedIPv4, _ := network.NewAddressFromString("0.0.0.0/0")
 	allowedIPv6, _ := network.NewAddressFromString("::/0")
@@ -152,7 +149,7 @@ func (wireguard *WireGuard) PeerWireguard(client *Peer) *WireGuard {
 	peer := &Peer{
 		PresharedKey: wireguard.PresharedKey,
 		PublicKey:    wireguard.PublicKey,
-		Endpoint:     udpAddr,
+		Endpoint:     endpoint,
 		AllowedIPs:   []network.Address{*allowedIPv4, *allowedIPv6},
 	}
 
