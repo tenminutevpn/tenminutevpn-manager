@@ -12,6 +12,10 @@ type Endpoint struct {
 }
 
 func (endpoint *Endpoint) String() string {
+	if endpoint.IP == nil {
+		return fmt.Sprintf(":%d", endpoint.Port)
+	}
+
 	return net.JoinHostPort(endpoint.IP.String(), fmt.Sprintf("%d", endpoint.Port))
 }
 

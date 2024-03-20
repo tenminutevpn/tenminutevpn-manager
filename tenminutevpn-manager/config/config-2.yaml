@@ -11,3 +11,4 @@ spec:
     - publickey: "peerPublicKey"
       allowedips:
         - 100.96.0.2/32
+      persistentkeepalive: 25

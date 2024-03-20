@@ -38,9 +38,9 @@ type wireguardTemplateData struct {
 	PrivateKey   string
 	PublicKey    string
 
-	DNS              string
-	Name             string
-	NetworkInterface string
+	DNS              string // TODO: This should be a list of DNS servers
+	Name             string // TODO: This should be the name of the Wireguard interface
+	NetworkInterface string // TODO: This should be the name of the network interface
 
 	Address string
 	Port    int

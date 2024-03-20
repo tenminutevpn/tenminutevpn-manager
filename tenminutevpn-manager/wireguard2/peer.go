@@ -69,3 +69,12 @@ func (peer *Peer) Render() string {
 	return output.String()
 
 }
+
+func (peer *Peer) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type P Peer
+	if err := unmarshal((*P)(peer)); err != nil {
+		return err
+	}
+
+	return nil
+}
