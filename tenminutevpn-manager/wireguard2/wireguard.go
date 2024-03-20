@@ -9,7 +9,7 @@ import (
 	"github.com/tenminutevpn/tenminutevpn-manager/utils"
 )
 
-type Wireguard struct {
+type WireGuard struct {
 	PresharedKey *Key `yaml:"presharedkey,omitempty"`
 	PrivateKey   *Key `yaml:"privatekey"`
 	PublicKey    *Key `yaml:"publickey,omitempty,omitempty"`
@@ -30,7 +30,7 @@ func init() {
 	wireguardTemplate = tpl
 }
 
-func (wireguard *Wireguard) Template() *template.Template {
+func (wireguard *WireGuard) Template() *template.Template {
 	return wireguardTemplate
 }
 
@@ -49,7 +49,7 @@ type wireguardTemplateData struct {
 	Peers []*Peer
 }
 
-func makeWireguardTemplateData(wireguard *Wireguard) *wireguardTemplateData {
+func makeWireguardTemplateData(wireguard *WireGuard) *wireguardTemplateData {
 	presharedKey := ""
 	if wireguard.PresharedKey != nil {
 		presharedKey = wireguard.PresharedKey.String()
@@ -77,14 +77,14 @@ func makeWireguardTemplateData(wireguard *Wireguard) *wireguardTemplateData {
 	}
 }
 
-func (wireguard *Wireguard) Render() string {
+func (wireguard *WireGuard) Render() string {
 	var output strings.Builder
 	wireguard.Template().Execute(&output, makeWireguardTemplateData(wireguard))
 	return output.String()
 }
 
-func (wireguard *Wireguard) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type W Wireguard
+func (wireguard *WireGuard) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type W WireGuard
 	wg := (*W)(wireguard)
 	if err := unmarshal(wg); err != nil {
 		return err
@@ -99,6 +99,6 @@ func (wireguard *Wireguard) UnmarshalYAML(unmarshal func(interface{}) error) err
 		wg.PublicKey = &k
 	}
 
-	*wireguard = Wireguard(*wg)
+	*wireguard = WireGuard(*wg)
 	return nil
 }
