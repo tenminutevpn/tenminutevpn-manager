@@ -35,14 +35,12 @@ func ParseResources() ([]*resource.Resource, error) {
 
 		switch res.Kind {
 		case "wireguard/v1":
-			var r wireguard2.WireguardResource
+			var r wireguard2.Resource
 			if err := yaml.Unmarshal(doc, &r); err != nil {
 				return nil, fmt.Errorf("failed to parse wireguard resource: %w", err)
 			}
-			fmt.Printf("Parsed wireguard resource: %v\n", r)
-			fmt.Printf("Parsed wireguard resource: %+v\n", r.Spec)
 			for _, peer := range r.Spec.Peers {
-				fmt.Printf("Parsed wireguard resource peer: %+v\n", peer)
+				fmt.Println(peer.Render())
 			}
 		default:
 			return nil, fmt.Errorf("unknown kind: %s", res.Kind)
