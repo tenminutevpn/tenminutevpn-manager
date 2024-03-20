@@ -1,88 +1,52 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/tenminutevpn/tenminutevpn-manager/network"
+	"github.com/tenminutevpn/tenminutevpn-manager/resource"
 	"gopkg.in/yaml.v3"
 )
 
-type Metadata struct {
-	Name string `yaml:"name"`
-}
-
-type Peer struct {
-	Name      string `yaml:"name"`
-	PublicKey string `yaml:"publicKey"`
-}
-
-type WireguardSpec struct {
-	Socket     network.Socket `yaml:"socket"`
-	PrivateKey string         `yaml:"privateKey"`
-	Peers      []Peer         `yaml:"peers"`
-}
-
-type SquidSpec struct {
-	Socket network.Socket `yaml:"socket"`
-	Access string         `yaml:"access"`
-}
-
-type Config struct {
-	Kind     string      `yaml:"kind"`
-	Metadata Metadata    `yaml:"metadata"`
-	Spec     interface{} `yaml:"spec"`
-}
-
-func ParseConfig() ([]*Config, error) {
-	file, err := os.Open("config/config.yaml")
+func ParseResources() ([]*resource.Resource, error) {
+	file, err := os.Open("config/config-2.yaml")
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	var configs []*Config
+	var resources []*resource.Resource
 	decoder := yaml.NewDecoder(file)
 
 	for {
-		var config Config
-		err := decoder.Decode(&config)
-		if err != nil {
+		var res resource.Resource
+		if err := decoder.Decode(&res); err != nil {
 			if err.Error() == "EOF" {
 				break
 			}
 			return nil, err
 		}
 
-		specData, err := yaml.Marshal(config.Spec)
-		if err != nil {
-			return nil, err
-		}
+		// switch res.Kind {
+		// case "wireguard/v1":
+		// 	var wgSpec WireguardSpec
+		// 	err = yaml.Unmarshal(specData, &wgSpec)
+		// 	if err != nil {
+		// 		return nil, err
+		// 	}
+		// 	res.Spec = wgSpec
+		// case "squid/v1":
+		// 	var squidSpec SquidSpec
+		// 	err = yaml.Unmarshal(specData, &squidSpec)
+		// 	if err != nil {
+		// 		return nil, err
+		// 	}
+		// 	res.Spec = squidSpec
+		// default:
+		// 	return nil, fmt.Errorf("unknown kind: %s", res.Kind)
+		// }
 
-		switch config.Kind {
-		case "wireguard/v1":
-			var wgSpec WireguardSpec
-			err = yaml.Unmarshal(specData, &wgSpec)
-			if err != nil {
-				return nil, err
-			}
-			config.Spec = wgSpec
-		case "squid/v1":
-			var squidSpec SquidSpec
-			err = yaml.Unmarshal(specData, &squidSpec)
-			if err != nil {
-				return nil, err
-			}
-			config.Spec = squidSpec
-		default:
-			return nil, fmt.Errorf("unknown kind: %s", config.Kind)
-		}
-
-		configs = append(configs, &config)
+		resources = append(resources, &res)
 	}
 
-	for _, config := range configs {
-		fmt.Println(config)
-	}
-	return configs, nil
+	return resources, nil
 }

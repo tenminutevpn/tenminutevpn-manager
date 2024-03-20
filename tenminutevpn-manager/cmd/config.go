@@ -9,7 +9,7 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "A brief description of your command",
 	Run: func(cmd *cobra.Command, args []string) {
-		_, err := config.ParseConfig()
+		_, err := config.ParseResources()
 		if err != nil {
 			panic(err)
 		}
