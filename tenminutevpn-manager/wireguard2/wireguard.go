@@ -1,18 +1,18 @@
 package wireguard2
 
 import (
+	"fmt"
 	"strings"
 	"text/template"
 
 	"github.com/tenminutevpn/tenminutevpn-manager/network"
 	"github.com/tenminutevpn/tenminutevpn-manager/utils"
-	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 )
 
 type Wireguard struct {
-	PresharedKey Key    `yaml:"presharedkey,omitempty"`
-	PrivateKey   Key    `yaml:"privatekey"`
-	PublicKey    string `yaml:"publickey,omitempty,omitempty"`
+	PresharedKey *Key `yaml:"presharedkey,omitempty"`
+	PrivateKey   *Key `yaml:"privatekey"`
+	PublicKey    *Key `yaml:"publickey,omitempty,omitempty"`
 
 	Address *network.Address `yaml:"address"`
 	Port    int              `yaml:"port"`
@@ -50,10 +50,25 @@ type wireguardTemplateData struct {
 }
 
 func makeWireguardTemplateData(wireguard *Wireguard) *wireguardTemplateData {
+	presharedKey := ""
+	if wireguard.PresharedKey != nil {
+		presharedKey = wireguard.PresharedKey.String()
+	}
+
+	privateKey := ""
+	if wireguard.PrivateKey != nil {
+		privateKey = wireguard.PrivateKey.String()
+	}
+
+	publicKey := ""
+	if wireguard.PublicKey != nil {
+		publicKey = wireguard.PublicKey.String()
+	}
+
 	return &wireguardTemplateData{
-		PresharedKey: wireguard.PresharedKey.String(),
-		PrivateKey:   wireguard.PrivateKey.String(),
-		PublicKey:    wireguard.PublicKey,
+		PresharedKey: presharedKey,
+		PrivateKey:   privateKey,
+		PublicKey:    publicKey,
 
 		Address: wireguard.Address.String(),
 		Port:    wireguard.Port,
@@ -75,12 +90,13 @@ func (wireguard *Wireguard) UnmarshalYAML(unmarshal func(interface{}) error) err
 		return err
 	}
 
-	if wg.PublicKey == "" {
-		privateKey, err := wgtypes.ParseKey(wg.PrivateKey.String())
-		if err != nil {
-			return err
-		}
-		wg.PublicKey = privateKey.PublicKey().String()
+	if wg.PrivateKey == nil {
+		return fmt.Errorf("private key is required")
+	}
+
+	if wg.PublicKey == nil {
+		k := wg.PrivateKey.PublicKey()
+		wg.PublicKey = &k
 	}
 
 	*wireguard = Wireguard(*wg)

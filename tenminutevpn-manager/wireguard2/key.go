@@ -4,11 +4,15 @@ import "golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 
 type Key wgtypes.Key
 
+func (k Key) PublicKey() Key {
+	return Key(wgtypes.Key(k).PublicKey())
+}
+
 func (k Key) String() string {
 	return wgtypes.Key(k).String()
 }
 
-func (k *Key) MarshalYAML() (interface{}, error) {
+func (k Key) MarshalYAML() (interface{}, error) {
 	return k.String(), nil
 }
 
