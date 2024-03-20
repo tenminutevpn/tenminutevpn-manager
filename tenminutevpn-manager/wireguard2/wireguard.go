@@ -11,6 +11,8 @@ import (
 )
 
 type WireGuard struct {
+	Device string `yaml:"device"`
+
 	PresharedKey *Key `yaml:"presharedkey,omitempty"`
 	PrivateKey   *Key `yaml:"privatekey"`
 	PublicKey    *Key `yaml:"publickey,omitempty,omitempty"`
@@ -37,12 +39,12 @@ func (wireguard *WireGuard) Template() *template.Template {
 }
 
 type wireguardTemplateData struct {
+	Device      string
+	DeviceRoute string
+
 	PresharedKey string
 	PrivateKey   string
 	PublicKey    string
-
-	Name             string // TODO: This should be the name of the Wireguard interface
-	NetworkInterface string // TODO: This should be the name of the network interface
 
 	Address string
 	Port    int
@@ -72,7 +74,15 @@ func makeWireguardTemplateData(wireguard *WireGuard) *wireguardTemplateData {
 		dns = append(dns, ip.String())
 	}
 
+	route, err := network.GetDefaultInterface()
+	if err != nil {
+		panic(err)
+	}
+
 	return &wireguardTemplateData{
+		Device:      wireguard.Device,
+		DeviceRoute: route,
+
 		PresharedKey: presharedKey,
 		PrivateKey:   privateKey,
 		PublicKey:    publicKey,
