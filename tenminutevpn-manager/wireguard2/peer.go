@@ -16,8 +16,8 @@ type Peer struct {
 	PrivateKey   *Key `yaml:"privateey,omitempty"`
 	PublicKey    *Key `yaml:"publickey"`
 
-	AllowedIPs []network.IPNet `yaml:"allowedips"`
-	Endpoint   *net.UDPAddr    `yaml:"endpoint,omitempty"`
+	AllowedIPs []network.Address `yaml:"allowedips"`
+	Endpoint   *net.UDPAddr      `yaml:"endpoint,omitempty"`
 
 	PersistentKeepalive time.Duration `yaml:"persistentkeepalive,omitempty"`
 }

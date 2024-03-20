@@ -120,3 +120,36 @@ func (wireguard *WireGuard) UnmarshalYAML(unmarshal func(interface{}) error) err
 	*wireguard = WireGuard(*wg)
 	return nil
 }
+
+func (wireguard *WireGuard) PeerWireguard(client *Peer) *WireGuard {
+	ip, err := network.GetPublicIPv4()
+	if err != nil {
+		panic(err)
+	}
+
+	udpAddr := &net.UDPAddr{
+		IP:   ip,
+		Port: wireguard.Port,
+	}
+
+	allowedIPv4, _ := network.NewAddressFromString("0.0.0.0/0")
+	allowedIPv6, _ := network.NewAddressFromString("::/0")
+
+	peer := &Peer{
+		PresharedKey: wireguard.PresharedKey,
+		PublicKey:    wireguard.PublicKey,
+		Endpoint:     udpAddr,
+		AllowedIPs:   []network.Address{*allowedIPv4, *allowedIPv6},
+	}
+
+	return &WireGuard{
+		PresharedKey: wireguard.PresharedKey,
+		PrivateKey:   client.PrivateKey,
+		PublicKey:    client.PublicKey,
+
+		Address: &client.AllowedIPs[0],
+
+		DNS:   wireguard.DNS,
+		Peers: []*Peer{peer},
+	}
+}

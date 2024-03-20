@@ -39,8 +39,9 @@ func ParseResources() ([]*resource.Resource, error) {
 			if err := yaml.Unmarshal(doc, &r); err != nil {
 				return nil, fmt.Errorf("failed to parse wireguard resource: %w", err)
 			}
-			fmt.Printf("Parsed wireguard resource: %+v\n", r.Spec)
-			fmt.Println(r.Spec.Render())
+			peer := r.Spec.Peers[0]
+			cfg := r.Spec.PeerWireguard(peer).Render()
+			fmt.Println(cfg)
 		default:
 			return nil, fmt.Errorf("unknown kind: %s", res.Kind)
 		}
