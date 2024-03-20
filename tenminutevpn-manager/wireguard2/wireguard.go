@@ -125,6 +125,12 @@ func (wireguard *WireGuard) UnmarshalYAML(unmarshal func(interface{}) error) err
 		}
 	}
 
+	if wg.Port == 0 {
+		wg.Port = 51820
+	} else if wg.Port < 1 || wg.Port > 65535 {
+		return fmt.Errorf("port must be between 1 and 65535")
+	}
+
 	*wireguard = WireGuard(*wg)
 	return nil
 }
