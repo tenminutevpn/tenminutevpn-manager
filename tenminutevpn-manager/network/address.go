@@ -10,16 +10,16 @@ type Address struct {
 	Network IPNet
 }
 
-func (addr *Address) Mask() int {
+func (addr Address) Mask() int {
 	ones, _ := addr.Network.Mask.Size()
 	return ones
 }
 
-func (addr *Address) String() string {
+func (addr Address) String() string {
 	return fmt.Sprintf("%s/%d", addr.IP, addr.Mask())
 }
 
-func (addr *Address) MarshalYAML() (interface{}, error) {
+func (addr Address) MarshalYAML() (interface{}, error) {
 	return addr.String(), nil
 }
 
