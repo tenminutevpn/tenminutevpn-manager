@@ -5,10 +5,10 @@ metadata:
 spec:
   address: 100.96.0.1/24
   port: 51820
-  privatekey: "privateKeyValue"
-  publickey: "publicKeyValue"
+  privatekey: "WKJkDPfRVMI/IZr3KPlaigUzrMZt3/t8fGPDtNSoK1w="
+  publickey: "ZzMDNv6tE4hjA6zY429BWNPnJJ1tft/1Q1R/EHCkaiU="
   peers:
-    - publickey: "peerPublicKey"
+    - publickey: "ZzMDNv6tE4hjA6zY429BWNPnJJ1tft/1Q1R/EHCkaiU="
       allowedips:
         - 100.96.0.2/32
-      persistentkeepalive: 25
+      persistentkeepalive: 25s

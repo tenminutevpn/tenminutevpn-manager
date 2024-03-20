@@ -7,7 +7,7 @@ import (
 
 type Address struct {
 	IP      net.IP
-	Network *net.IPNet
+	Network IPNet
 }
 
 func (addr *Address) Mask() int {
@@ -31,14 +31,14 @@ func (addr *Address) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 
 	addr.IP = ip
-	addr.Network = ipNet
+	addr.Network = IPNet(*ipNet)
 	return nil
 }
 
 func NewAddress(ip net.IP, network *net.IPNet) *Address {
 	return &Address{
 		IP:      ip,
-		Network: network,
+		Network: IPNet(*network),
 	}
 }
 
@@ -50,6 +50,6 @@ func NewAddressFromString(addr string) (*Address, error) {
 
 	return &Address{
 		IP:      ip,
-		Network: ipNet,
+		Network: IPNet(*ipNet),
 	}, nil
 }

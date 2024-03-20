@@ -1,22 +1,24 @@
 package wireguard2
 
 import (
+	"net"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/tenminutevpn/tenminutevpn-manager/network"
 	"github.com/tenminutevpn/tenminutevpn-manager/utils"
 )
 
 type Peer struct {
-	PresharedKey string `yaml:"presharedkey,omitempty"`
-	PrivateKey   string `yaml:"privateey,omitempty"`
-	PublicKey    string `yaml:"publickey"`
+	PresharedKey Key `yaml:"presharedkey,omitempty"`
+	PrivateKey   Key `yaml:"privateey,omitempty"`
+	PublicKey    Key `yaml:"publickey"`
 
-	AllowedIPs []*network.Address `yaml:"allowedips"`
-	Endpoint   *network.Endpoint  `yaml:"endpoint,omitempty"`
+	AllowedIPs []network.IPNet `yaml:"allowedips"`
+	Endpoint   *net.UDPAddr    `yaml:"endpoint,omitempty"`
 
-	PersistentKeepalive int `yaml:"persistentkeepalive,omitempty"`
+	PersistentKeepalive time.Duration `yaml:"persistentkeepalive,omitempty"`
 }
 
 var peerTemplate *template.Template
@@ -54,12 +56,14 @@ func makePeerTemplateData(peer *Peer) *peerTemplateData {
 		endpoint = peer.Endpoint.String()
 	}
 
+	persistentKeepalive := int(peer.PersistentKeepalive / time.Second)
+
 	return &peerTemplateData{
-		PublicKey:           peer.PublicKey,
+		PublicKey:           peer.PublicKey.String(),
 		AllowedIPs:          strings.Join(allowedIPs, ", "),
 		Endpoint:            endpoint,
-		PersistentKeepalive: peer.PersistentKeepalive,
-		PresharedKey:        peer.PresharedKey,
+		PersistentKeepalive: persistentKeepalive,
+		PresharedKey:        peer.PresharedKey.String(),
 	}
 }
 
