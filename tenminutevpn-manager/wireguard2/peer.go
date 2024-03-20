@@ -43,18 +43,23 @@ type peerTemplateData struct {
 	PersistentKeepalive int
 }
 
-func makePeerTemplateData(p *Peer) *peerTemplateData {
-	allowedIPs := make([]string, 0, len(p.AllowedIPs))
-	for _, allowedIP := range p.AllowedIPs {
+func makePeerTemplateData(peer *Peer) *peerTemplateData {
+	allowedIPs := make([]string, 0, len(peer.AllowedIPs))
+	for _, allowedIP := range peer.AllowedIPs {
 		allowedIPs = append(allowedIPs, allowedIP.String())
 	}
 
+	endpoint := ""
+	if peer.Endpoint != nil {
+		endpoint = peer.Endpoint.String()
+	}
+
 	return &peerTemplateData{
-		PublicKey:           p.PublicKey,
+		PublicKey:           peer.PublicKey,
 		AllowedIPs:          strings.Join(allowedIPs, ", "),
-		Endpoint:            p.Endpoint.String(),
-		PersistentKeepalive: p.PersistentKeepalive,
-		PresharedKey:        p.PresharedKey,
+		Endpoint:            endpoint,
+		PersistentKeepalive: peer.PersistentKeepalive,
+		PresharedKey:        peer.PresharedKey,
 	}
 }
 
