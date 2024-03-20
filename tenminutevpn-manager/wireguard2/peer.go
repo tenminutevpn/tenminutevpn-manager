@@ -88,17 +88,23 @@ func (peer *Peer) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
-	if peer.PrivateKey != nil {
-		publickey := peer.PrivateKey.PublicKey()
-		if peer.PublicKey == nil {
-			peer.PublicKey = &publickey
-		} else if *peer.PublicKey != publickey {
-			return fmt.Errorf("public key does not match private key")
-		}
-	}
-
 	if peer.PublicKey == nil {
-		return fmt.Errorf("public key is required")
+		if peer.PrivateKey == nil {
+			privatekey, err := GenerateKey()
+			if err != nil {
+				return fmt.Errorf("failed to generate private key: %w", err)
+			}
+			peer.PrivateKey = &privatekey
+		}
+		publickey := peer.PrivateKey.PublicKey()
+		peer.PublicKey = &publickey
+
+	} else {
+		if peer.PrivateKey != nil {
+			if peer.PublicKey.String() != peer.PrivateKey.PublicKey().String() {
+				return fmt.Errorf("public key does not match private key")
+			}
+		}
 	}
 
 	return nil

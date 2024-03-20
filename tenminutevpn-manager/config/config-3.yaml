@@ -9,7 +9,6 @@ spec:
     - 1.1.1.1
     - 1.0.0.1
   peers:
-    - publickey: "ZzMDNv6tE4hjA6zY429BWNPnJJ1tft/1Q1R/EHCkaiU="
-      allowedips:
+    - allowedips:
         - 100.96.0.2/32
       persistentkeepalive: 25s
