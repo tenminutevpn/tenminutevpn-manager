@@ -10,7 +10,7 @@ import (
 )
 
 func ParseResources() ([]*resource.Resource, error) {
-	file, err := os.Open("config/config-2.yaml")
+	file, err := os.Open("config/config-3.yaml")
 	if err != nil {
 		return nil, err
 	}

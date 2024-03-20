@@ -109,12 +109,20 @@ func (wireguard *WireGuard) UnmarshalYAML(unmarshal func(interface{}) error) err
 	}
 
 	if wg.PrivateKey == nil {
-		return fmt.Errorf("private key is required")
+		privatekey, err := GenerateKey()
+		if err != nil {
+			return fmt.Errorf("failed to generate private key: %w", err)
+		}
+		wg.PrivateKey = &privatekey
 	}
 
 	if wg.PublicKey == nil {
 		k := wg.PrivateKey.PublicKey()
 		wg.PublicKey = &k
+	} else {
+		if wg.PublicKey.String() != wg.PrivateKey.PublicKey().String() {
+			return fmt.Errorf("public key does not match private key")
+		}
 	}
 
 	*wireguard = WireGuard(*wg)

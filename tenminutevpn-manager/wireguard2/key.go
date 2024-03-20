@@ -34,3 +34,12 @@ func (k *Key) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	*k = Key(wireguardKey)
 	return nil
 }
+
+func GenerateKey() (Key, error) {
+	key, err := wgtypes.GenerateKey()
+	if err != nil {
+		return Key{}, err
+	}
+	return Key(key), nil
+
+}
