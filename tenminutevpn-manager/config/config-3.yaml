@@ -1,4 +1,12 @@
 ---
+kind: squid/v1
+metadata:
+  name: squid-1
+  annotations:
+    tenminutevpn.com/config-dir: /etc/squid/
+spec:
+  port: 3128
+---
 kind: wireguard/v1
 metadata:
   name: wireguard-1

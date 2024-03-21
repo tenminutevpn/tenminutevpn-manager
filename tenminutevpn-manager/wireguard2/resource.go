@@ -14,12 +14,12 @@ type Resource struct {
 	Spec     *WireGuard        `yaml:"spec"`
 }
 
-type ResourceOptions struct {
+type Options struct {
 	ConfigDir     string
 	PeerConfigDir string
 }
 
-func (r *Resource) Options() *ResourceOptions {
+func (r *Resource) Options() *Options {
 	configDir := fmt.Sprintf("/etc/wireguard/")
 	if r.Metadata.Annotations["tenminutevpn.com/config-dir"] != "" {
 		configDir = r.Metadata.Annotations["tenminutevpn.com/config-dir"]
@@ -38,7 +38,7 @@ func (r *Resource) Options() *ResourceOptions {
 		utils.CreateDir(peerConfigDir)
 	}
 
-	return &ResourceOptions{
+	return &Options{
 		ConfigDir:     configDir,
 		PeerConfigDir: peerConfigDir,
 	}
