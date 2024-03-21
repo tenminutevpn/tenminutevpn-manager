@@ -1,4 +1,4 @@
-package squid2
+package squid
 
 import (
 	"fmt"

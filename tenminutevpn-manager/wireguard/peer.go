@@ -1,4 +1,4 @@
-package wireguard2
+package wireguard
 
 import (
 	"fmt"

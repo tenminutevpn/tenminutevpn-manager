@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/tenminutevpn/tenminutevpn-manager/resource"
-	"github.com/tenminutevpn/tenminutevpn-manager/squid2"
-	"github.com/tenminutevpn/tenminutevpn-manager/wireguard2"
+	"github.com/tenminutevpn/tenminutevpn-manager/squid"
+	"github.com/tenminutevpn/tenminutevpn-manager/wireguard"
 	"gopkg.in/yaml.v3"
 )
 
@@ -36,7 +36,7 @@ func ParseResources() ([]*resource.Resource, error) {
 
 		switch res.Kind {
 		case "wireguard/v1":
-			var r wireguard2.Resource
+			var r wireguard.Resource
 			if err := yaml.Unmarshal(doc, &r); err != nil {
 				return nil, fmt.Errorf("failed to parse wireguard resource: %w", err)
 			}
@@ -53,7 +53,7 @@ func ParseResources() ([]*resource.Resource, error) {
 				return nil, fmt.Errorf("failed to start wireguard service: %w", err)
 			}
 		case "squid/v1":
-			var r squid2.Resource
+			var r squid.Resource
 			if err := yaml.Unmarshal(doc, &r); err != nil {
 				return nil, fmt.Errorf("failed to parse squid resource: %w", err)
 			}
