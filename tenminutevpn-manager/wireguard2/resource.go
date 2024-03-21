@@ -13,39 +13,47 @@ type Resource struct {
 	Spec     *WireGuard        `yaml:"spec"`
 }
 
-func (r *Resource) deviceConfigPath() string {
-	path := fmt.Sprintf("/etc/wireguard/%s.conf", r.Metadata.Name)
-	if r.Metadata.Annotations["tenminutevpn.com/wireguard"] != "" {
-		path = r.Metadata.Annotations["tenminutevpn.com/wireguard"]
-	}
-	return path
+type ResourceOptions struct {
+	ConfigDir     string
+	PeerConfigDir string
 }
 
-func (r *Resource) peerConfigPath() string {
-	path := fmt.Sprintf("/etc/wireguard/peers")
-	if r.Metadata.Annotations["tenminutevpn.com/wireguard-peers"] != "" {
-		path = r.Metadata.Annotations["tenminutevpn.com/wireguard-peers"]
+func (r *Resource) Options() *ResourceOptions {
+	configDir := fmt.Sprintf("/etc/wireguard/")
+	if r.Metadata.Annotations["tenminutevpn.com/config-dir"] != "" {
+		configDir = r.Metadata.Annotations["tenminutevpn.com/config-dir"]
 	}
 
-	if ok := utils.PathExists(path); !ok {
-		utils.CreateDir(path)
+	if ok := utils.PathExists(configDir); !ok {
+		utils.CreateDir(configDir)
 	}
 
-	return path
+	peerConfigDir := fmt.Sprintf("/etc/wireguard/peers")
+	if r.Metadata.Annotations["tenminutevpn.com/peer-config-dir"] != "" {
+		peerConfigDir = r.Metadata.Annotations["tenminutevpn.com/peer-config-dir"]
+	}
+
+	if ok := utils.PathExists(peerConfigDir); !ok {
+		utils.CreateDir(peerConfigDir)
+	}
+
+	return &ResourceOptions{
+		ConfigDir:     configDir,
+		PeerConfigDir: peerConfigDir,
+	}
 }
 
 func (r *Resource) Process() error {
-	err := utils.WriteToFile(r.deviceConfigPath(), 0600, r.Spec.Render())
-	if err != nil {
+	deviceConfig := r.Spec.Render()
+	deviceConfigPath := fmt.Sprintf("%s/%s.conf", r.Options().ConfigDir, r.Metadata.Name)
+	if err := utils.WriteToFile(deviceConfigPath, 0600, deviceConfig); err != nil {
 		return fmt.Errorf("failed to write wireguard config to file: %w", err)
 	}
 
 	for peerID, peer := range r.Spec.Peers {
-		peerConfigPath := fmt.Sprintf("%s/peer-%d.conf", r.peerConfigPath(), peerID)
-
-		peerWireguard := r.Spec.PeerWireguard(peer)
-		err := utils.WriteToFile(peerConfigPath, 0600, peerWireguard.Render())
-		if err != nil {
+		peerConfig := r.Spec.PeerWireguard(peer).Render()
+		peerConfigPath := fmt.Sprintf("%s/peer-%d.conf", r.Options().PeerConfigDir, peerID)
+		if err := utils.WriteToFile(peerConfigPath, 0600, peerConfig); err != nil {
 			return fmt.Errorf("failed to write wireguard peer config to file: %w", err)
 		}
 	}
