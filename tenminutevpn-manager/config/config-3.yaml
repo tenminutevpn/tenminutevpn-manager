@@ -3,8 +3,8 @@ kind: wireguard/v1
 metadata:
   name: wg0
   annotations:
-    tenminutevpn.com/config-dir: /tmp/wg/
-    tenminutevpn.com/peer-config-dir: /tmp/wg/
+    tenminutevpn.com/config-dir: /etc/wireguard/
+    tenminutevpn.com/peer-config-dir: /etc/wireguard/peers/
 spec:
   device: wg0
   address: 100.96.0.1/24
