@@ -63,5 +63,5 @@ func (r *Resource) Create() error {
 }
 
 func (r *Resource) Service() *systemd.Service {
-	return systemd.NewService(fmt.Sprintf("wg-quick@%s", r.Metadata.Name))
+	return systemd.NewService(fmt.Sprintf("wg-quick@%s", r.Spec.Device))
 }

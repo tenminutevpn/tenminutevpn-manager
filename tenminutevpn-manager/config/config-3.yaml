@@ -1,7 +1,7 @@
 ---
 kind: wireguard/v1
 metadata:
-  name: wg0
+  name: wireguard-1
   annotations:
     tenminutevpn.com/config-dir: /etc/wireguard/
     tenminutevpn.com/peer-config-dir: /etc/wireguard/peers/
