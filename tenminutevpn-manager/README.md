@@ -1,3 +1,6 @@
+# Config Sample
+
+```yaml
 ---
 kind: squid/v1
 metadata:
@@ -24,3 +27,4 @@ spec:
         - 100.96.0.2/32
     - allowedips:
         - 100.86.0.3/32
+```
