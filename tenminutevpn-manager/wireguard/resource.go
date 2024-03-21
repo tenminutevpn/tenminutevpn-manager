@@ -46,7 +46,7 @@ func (r *Resource) Options() *Options {
 
 func (r *Resource) Create() error {
 	deviceConfig := r.Spec.Render()
-	deviceConfigPath := fmt.Sprintf("%s/%s.conf", r.Options().ConfigDir, r.Metadata.Name)
+	deviceConfigPath := fmt.Sprintf("%s/%s.conf", r.Options().ConfigDir, r.Spec.Device)
 	if err := utils.WriteToFile(deviceConfigPath, 0600, deviceConfig); err != nil {
 		return fmt.Errorf("failed to write wireguard config to file: %w", err)
 	}
