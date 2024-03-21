@@ -1,7 +1,8 @@
 package resource
 
 type Metadata struct {
-	Name string `yaml:"name"`
+	Name        string            `yaml:"name"`
+	Annotations map[string]string `yaml:"annotations,omitempty"`
 }
 
 type Resource struct {
