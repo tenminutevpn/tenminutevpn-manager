@@ -30,7 +30,7 @@ func GetDefaultInterface() (string, error) {
 }
 
 func GetPublicIPv4() (net.IP, error) {
-	resp, err := http.Get("https://ipinfo.io/ip")
+	resp, err := http.Get("https://api.ipify.org/")
 	if err != nil {
 		return nil, err
 	}

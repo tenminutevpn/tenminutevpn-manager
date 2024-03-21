@@ -3,99 +3,164 @@ package wireguard
 import (
 	"fmt"
 	"net"
+	"strings"
+	"text/template"
 
 	"github.com/tenminutevpn/tenminutevpn-manager/network"
-	"github.com/tenminutevpn/tenminutevpn-manager/systemd"
+	"github.com/tenminutevpn/tenminutevpn-manager/utils"
 )
 
-type Wireguard struct {
-	Name    string
-	KeyPair *KeyPair
+type WireGuard struct {
+	Device string `yaml:"device"`
 
-	NetworkInterface string
-	Address          *Address
-	Port             int
+	PresharedKey *Key `yaml:"presharedkey,omitempty"`
+	PrivateKey   *Key `yaml:"privatekey"`
+	PublicKey    *Key `yaml:"publickey,omitempty,omitempty"`
 
-	DNS []net.IP
+	Address *network.Address `yaml:"address"`
+	Port    int              `yaml:"port"`
+
+	Peers []*Peer   `yaml:"peers,omitempty"`
+	DNS   []*net.IP `yaml:"dns,omitempty"`
+}
+
+var wireguardTemplate *template.Template
+
+func init() {
+	tpl, err := utils.NewTemplate(templateFS, "templates/wireguard.conf.tpl")
+	if err != nil {
+		panic(err)
+	}
+	wireguardTemplate = tpl
+}
+
+func (wireguard *WireGuard) Template() *template.Template {
+	return wireguardTemplate
+}
+
+type wireguardTemplateData struct {
+	Device      string
+	DeviceRoute string
+
+	PresharedKey string
+	PrivateKey   string
+	PublicKey    string
+
+	Address string
+	Port    int
 
 	Peers []*Peer
+	DNS   string
 }
 
-func NewWireguard(name string, networkInterface string, addr string, port int) (*Wireguard, error) {
-	address, err := NewAddressFromString(addr)
+func makeWireguardTemplateData(wireguard *WireGuard) *wireguardTemplateData {
+	presharedKey := ""
+	if wireguard.PresharedKey != nil {
+		presharedKey = wireguard.PresharedKey.String()
+	}
+
+	privateKey := ""
+	if wireguard.PrivateKey != nil {
+		privateKey = wireguard.PrivateKey.String()
+	}
+
+	publicKey := ""
+	if wireguard.PublicKey != nil {
+		publicKey = wireguard.PublicKey.String()
+	}
+
+	dns := make([]string, 0, len(wireguard.DNS))
+	for _, ip := range wireguard.DNS {
+		dns = append(dns, ip.String())
+	}
+
+	route, err := network.GetDefaultInterface()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	privkey, err := GeneratePrivateKey()
-	if err != nil {
-		return nil, err
+	return &wireguardTemplateData{
+		Device:      wireguard.Device,
+		DeviceRoute: route,
+
+		PresharedKey: presharedKey,
+		PrivateKey:   privateKey,
+		PublicKey:    publicKey,
+
+		Address: wireguard.Address.String(),
+		Port:    wireguard.Port,
+
+		Peers: wireguard.Peers,
+		DNS:   strings.Join(dns, ", "),
 	}
-
-	keyPair, err := NewKeyPair(privkey)
-	if err != nil {
-		return nil, err
-	}
-
-	dns := []net.IP{
-		net.ParseIP("1.1.1.1"),
-		net.ParseIP("1.0.0.1"),
-	}
-
-	return &Wireguard{
-		Name:    name,
-		KeyPair: keyPair,
-
-		NetworkInterface: networkInterface,
-
-		DNS: dns,
-
-		Address: address,
-		Port:    port,
-	}, nil
 }
 
-func (server *Wireguard) AddPeer(client *Wireguard) error {
-	peer := &Peer{
-		PublicKey:  client.KeyPair.PublicKey,
-		AllowedIPs: []*Address{client.Address},
-	}
-	server.Peers = append(server.Peers, peer)
+func (wireguard *WireGuard) Render() string {
+	var output strings.Builder
+	wireguard.Template().Execute(&output, makeWireguardTemplateData(wireguard))
+	return output.String()
+}
 
-	allowedIPv4, err := NewAddressFromString("0.0.0.0/0")
-	if err != nil {
-		return fmt.Errorf("failed to create allowed IPv4: %w", err)
-	}
-
-	allowedIPv6, err := NewAddressFromString("::/0")
-	if err != nil {
-		return fmt.Errorf("failed to create allowed IPv6: %w", err)
+func (wireguard *WireGuard) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type W WireGuard
+	wg := (*W)(wireguard)
+	if err := unmarshal(wg); err != nil {
+		return err
 	}
 
-	endpointIPv4, err := network.GetPublicIPv4()
-	if err != nil {
-		return fmt.Errorf("failed to get public IPv4: %w", err)
+	if wg.PrivateKey == nil {
+		privatekey, err := NewKey()
+		if err != nil {
+			return fmt.Errorf("failed to generate private key: %w", err)
+		}
+		wg.PrivateKey = &privatekey
 	}
 
-	peer = &Peer{
-		PublicKey:  server.KeyPair.PublicKey,
-		AllowedIPs: []*Address{allowedIPv4, allowedIPv6},
-		Endpoint:   fmt.Sprintf("%s:%d", endpointIPv4.String(), server.Port),
+	if wg.PublicKey == nil {
+		k := wg.PrivateKey.PublicKey()
+		wg.PublicKey = &k
+	} else {
+		if wg.PublicKey.String() != wg.PrivateKey.PublicKey().String() {
+			return fmt.Errorf("public key does not match private key")
+		}
 	}
-	client.Peers = append(client.Peers, peer)
 
+	if wg.Port == 0 {
+		wg.Port = 51820
+	} else if wg.Port < 1 || wg.Port > 65535 {
+		return fmt.Errorf("port must be between 1 and 65535")
+	}
+
+	*wireguard = WireGuard(*wg)
 	return nil
 }
 
-func (wg *Wireguard) Render() string {
-	return makeTemplateWireguardData(wg).Render()
-}
+func (wireguard *WireGuard) PeerWireguard(client *Peer) *WireGuard {
+	ip, err := network.GetPublicIPv4()
+	if err != nil {
+		panic(err)
+	}
 
-func (wg *Wireguard) Write(filename string) error {
-	data := wg.Render()
-	return writeToFile(filename, 0600, data)
-}
+	endpoint := network.NewEndpoint(ip, wireguard.Port)
 
-func (wg *Wireguard) SystemdService() *systemd.Service {
-	return systemd.NewService(fmt.Sprintf("wg-quick@%s", wg.Name))
+	allowedIPv4, _ := network.NewAddressFromString("0.0.0.0/0")
+	allowedIPv6, _ := network.NewAddressFromString("::/0")
+
+	peer := &Peer{
+		PresharedKey: wireguard.PresharedKey,
+		PublicKey:    wireguard.PublicKey,
+		Endpoint:     endpoint,
+		AllowedIPs:   []network.Address{*allowedIPv4, *allowedIPv6},
+	}
+
+	return &WireGuard{
+		PresharedKey: wireguard.PresharedKey,
+		PrivateKey:   client.PrivateKey,
+		PublicKey:    client.PublicKey,
+
+		Address: &client.AllowedIPs[0],
+
+		DNS:   wireguard.DNS,
+		Peers: []*Peer{peer},
+	}
 }

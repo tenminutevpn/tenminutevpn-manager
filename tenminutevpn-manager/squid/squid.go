@@ -1,25 +1,58 @@
 package squid
 
 import (
-	"github.com/tenminutevpn/tenminutevpn-manager/systemd"
+	"strings"
+	"text/template"
+
+	"github.com/tenminutevpn/tenminutevpn-manager/utils"
 )
 
 type Squid struct {
+	Port int `yaml:"port"`
+}
+
+var squidTemplate *template.Template
+
+func init() {
+	tpl, err := utils.NewTemplate(templateFS, "templates/squid.conf.tpl")
+	if err != nil {
+		panic(err)
+	}
+	squidTemplate = tpl
+}
+
+func (squid *Squid) Template() *template.Template {
+	return squidTemplate
+}
+
+type squidTemplateData struct {
 	Port int
 }
 
-func NewSquid(port int) *Squid {
-	return &Squid{Port: port}
+func makeSquidTemplateData(squid *Squid) *squidTemplateData {
+	return &squidTemplateData{
+		Port: squid.Port,
+	}
 }
 
-func (s *Squid) SystemdService() *systemd.Service {
-	return systemd.NewService("squid")
+func (squid *Squid) Render() string {
+	var output strings.Builder
+	squid.Template().Execute(&output, makeSquidTemplateData(squid))
+	return output.String()
 }
 
-func (s *Squid) Render() string {
-	return makeTemplateSquidData(s).Render()
+func (squid *Squid) MarshalYAML() (interface{}, error) {
+	return map[string]interface{}{
+		"port": squid.Port,
+	}, nil
 }
 
-func (s *Squid) Write(path string) error {
-	return writeToFile(path, 0644, s.Render())
+func (squid *Squid) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type S Squid
+	s := (*S)(squid)
+	if err := unmarshal(&s); err != nil {
+		return err
+	}
+	*squid = Squid(*s)
+	return nil
 }
