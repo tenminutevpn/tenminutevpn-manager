@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/tenminutevpn/tenminutevpn-manager/resource"
+	"github.com/tenminutevpn/tenminutevpn-manager/systemd"
 	"github.com/tenminutevpn/tenminutevpn-manager/utils"
 )
 
@@ -43,7 +44,7 @@ func (r *Resource) Options() *ResourceOptions {
 	}
 }
 
-func (r *Resource) Process() error {
+func (r *Resource) Create() error {
 	deviceConfig := r.Spec.Render()
 	deviceConfigPath := fmt.Sprintf("%s/%s.conf", r.Options().ConfigDir, r.Metadata.Name)
 	if err := utils.WriteToFile(deviceConfigPath, 0600, deviceConfig); err != nil {
@@ -59,4 +60,8 @@ func (r *Resource) Process() error {
 	}
 
 	return nil
+}
+
+func (r *Resource) Service() *systemd.Service {
+	return systemd.NewService(fmt.Sprintf("wg-quick@%s", r.Metadata.Name))
 }

@@ -39,18 +39,18 @@ func ParseResources() ([]*resource.Resource, error) {
 			if err := yaml.Unmarshal(doc, &r); err != nil {
 				return nil, fmt.Errorf("failed to parse wireguard resource: %w", err)
 			}
-			// peer := r.Spec.Peers[0]
-			// cfg := r.Spec.PeerWireguard(peer).Render()
-			// fmt.Println(cfg)
 
-			// marshal the resource back to yaml
-			// d, _ := yaml.Marshal(&r)
-			// fmt.Println(string(d))
-			err := r.Process()
-			if err != nil {
+			if err := r.Create(); err != nil {
 				return nil, fmt.Errorf("failed to process wireguard resource: %w", err)
 			}
 
+			if err := r.Service().Enable(); err != nil {
+				return nil, fmt.Errorf("failed to enable wireguard service: %w", err)
+			}
+
+			if err := r.Service().Start(); err != nil {
+				return nil, fmt.Errorf("failed to start wireguard service: %w", err)
+			}
 		default:
 			return nil, fmt.Errorf("unknown kind: %s", res.Kind)
 		}
