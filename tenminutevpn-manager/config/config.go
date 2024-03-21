@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/tenminutevpn/tenminutevpn-manager/resource"
+	"github.com/tenminutevpn/tenminutevpn-manager/squid2"
 	"github.com/tenminutevpn/tenminutevpn-manager/wireguard2"
 	"gopkg.in/yaml.v3"
 )
@@ -50,6 +51,23 @@ func ParseResources() ([]*resource.Resource, error) {
 
 			if err := r.Service().Start(); err != nil {
 				return nil, fmt.Errorf("failed to start wireguard service: %w", err)
+			}
+		case "squid/v1":
+			var r squid2.Resource
+			if err := yaml.Unmarshal(doc, &r); err != nil {
+				return nil, fmt.Errorf("failed to parse squid resource: %w", err)
+			}
+
+			if err := r.Create(); err != nil {
+				return nil, fmt.Errorf("failed to process squid resource: %w", err)
+			}
+
+			if err := r.Service().Enable(); err != nil {
+				return nil, fmt.Errorf("failed to enable squid service: %w", err)
+			}
+
+			if err := r.Service().Start(); err != nil {
+				return nil, fmt.Errorf("failed to start squid service: %w", err)
 			}
 		default:
 			return nil, fmt.Errorf("unknown kind: %s", res.Kind)
