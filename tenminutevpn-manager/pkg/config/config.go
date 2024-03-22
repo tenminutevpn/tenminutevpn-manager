@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/tenminutevpn/tenminutevpn-manager/resource"
-	"github.com/tenminutevpn/tenminutevpn-manager/squid"
-	"github.com/tenminutevpn/tenminutevpn-manager/wireguard"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/resource"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/squid"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/wireguard"
 	"gopkg.in/yaml.v3"
 )
 

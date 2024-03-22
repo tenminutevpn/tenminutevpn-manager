@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/tenminutevpn/tenminutevpn-manager/config"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/config"
 )
 
 var configCmd = &cobra.Command{

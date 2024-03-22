@@ -3,9 +3,9 @@ package squid
 import (
 	"fmt"
 
-	"github.com/tenminutevpn/tenminutevpn-manager/resource"
-	"github.com/tenminutevpn/tenminutevpn-manager/systemd"
-	"github.com/tenminutevpn/tenminutevpn-manager/utils"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/resource"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/systemd"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/utils"
 )
 
 type Resource struct {
