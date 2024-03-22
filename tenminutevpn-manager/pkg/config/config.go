@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/tenminutevpn/tenminutevpn-manager/pkg/resource"
-	"github.com/tenminutevpn/tenminutevpn-manager/pkg/squid"
-	"github.com/tenminutevpn/tenminutevpn-manager/pkg/wireguard"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/provider/squid"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/provider/wireguard"
 	"gopkg.in/yaml.v3"
 )
 

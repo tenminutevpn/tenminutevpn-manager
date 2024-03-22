@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/tenminutevpn/tenminutevpn-manager/pkg/resource"
-	"github.com/tenminutevpn/tenminutevpn-manager/pkg/systemd"
-	"github.com/tenminutevpn/tenminutevpn-manager/pkg/utils"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/system/systemd"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/system/utils"
 )
 
 type Resource struct {

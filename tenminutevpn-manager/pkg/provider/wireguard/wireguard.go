@@ -6,8 +6,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/tenminutevpn/tenminutevpn-manager/pkg/network"
-	"github.com/tenminutevpn/tenminutevpn-manager/pkg/utils"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/system/network"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/system/utils"
 )
 
 type WireGuard struct {
