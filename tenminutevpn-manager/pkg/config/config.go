@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/provider/dnsmasq"
 	"github.com/tenminutevpn/tenminutevpn-manager/pkg/provider/squid"
 	"github.com/tenminutevpn/tenminutevpn-manager/pkg/provider/wireguard"
 	"github.com/tenminutevpn/tenminutevpn-manager/pkg/resource"
@@ -76,6 +77,24 @@ func ParseResources(filename string) error {
 		fmt.Println("Resource:", res.Kind, res.Metadata.Name)
 
 		switch res.Kind {
+		case "dnsmasq/v1":
+			var r dnsmasq.Resource
+			if err := yaml.Unmarshal(doc, &r); err != nil {
+				return fmt.Errorf("failed to parse dnsmasq resource: %w", err)
+			}
+
+			if err := r.Create(); err != nil {
+				return fmt.Errorf("failed to process dnsmasq resource: %w", err)
+			}
+
+			if err := r.Service().Enable(); err != nil {
+				return fmt.Errorf("failed to enable dnsmasq service: %w", err)
+			}
+
+			if err := r.Service().Start(); err != nil {
+				return fmt.Errorf("failed to start dnsmasq service: %w", err)
+			}
+
 		case "wireguard/v1":
 			var r wireguard.Resource
 			if err := yaml.Unmarshal(doc, &r); err != nil {
@@ -93,6 +112,7 @@ func ParseResources(filename string) error {
 			if err := r.Service().Start(); err != nil {
 				return fmt.Errorf("failed to start wireguard service: %w", err)
 			}
+
 		case "squid/v1":
 			var r squid.Resource
 			if err := yaml.Unmarshal(doc, &r); err != nil {
