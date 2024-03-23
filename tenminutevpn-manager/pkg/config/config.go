@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/provider/dnsmasq"
 	"github.com/tenminutevpn/tenminutevpn-manager/pkg/provider/squid"
 	"github.com/tenminutevpn/tenminutevpn-manager/pkg/provider/wireguard"
 	"github.com/tenminutevpn/tenminutevpn-manager/pkg/resource"
@@ -32,6 +34,7 @@ func ParseResourcesDirectory(directory string) error {
 		return err
 	}
 
+	fileNames := make([]string, 0)
 	for _, file := range files {
 		if file.IsDir() {
 			continue
@@ -41,7 +44,12 @@ func ParseResourcesDirectory(directory string) error {
 			continue
 		}
 
-		filename := filepath.Join(directory, file.Name())
+		fileNames = append(fileNames, file.Name())
+	}
+
+	sort.Strings(fileNames)
+	for _, filename := range fileNames {
+		filename = filepath.Join(directory, filename)
 		if err := ParseResources(filename); err != nil {
 			return err
 		}
@@ -76,6 +84,24 @@ func ParseResources(filename string) error {
 		fmt.Println("Resource:", res.Kind, res.Metadata.Name)
 
 		switch res.Kind {
+		case "dnsmasq/v1":
+			var r dnsmasq.Resource
+			if err := yaml.Unmarshal(doc, &r); err != nil {
+				return fmt.Errorf("failed to parse dnsmasq resource: %w", err)
+			}
+
+			if err := r.Create(); err != nil {
+				return fmt.Errorf("failed to process dnsmasq resource: %w", err)
+			}
+
+			if err := r.Service().Enable(); err != nil {
+				return fmt.Errorf("failed to enable dnsmasq service: %w", err)
+			}
+
+			if err := r.Service().Start(); err != nil {
+				return fmt.Errorf("failed to start dnsmasq service: %w", err)
+			}
+
 		case "wireguard/v1":
 			var r wireguard.Resource
 			if err := yaml.Unmarshal(doc, &r); err != nil {
@@ -93,6 +119,7 @@ func ParseResources(filename string) error {
 			if err := r.Service().Start(); err != nil {
 				return fmt.Errorf("failed to start wireguard service: %w", err)
 			}
+
 		case "squid/v1":
 			var r squid.Resource
 			if err := yaml.Unmarshal(doc, &r); err != nil {
