@@ -23,7 +23,7 @@ var configCmd = &cobra.Command{
 }
 
 func init() {
-	configCmd.Flags().StringP("file", "f", "/etc/tenminutevpn/tenminutevpn.yaml", "config file")
+	configCmd.Flags().StringP("file", "f", "/etc/tenminutevpn/", "config file")
 
 	rootCmd.AddCommand(configCmd)
 }
