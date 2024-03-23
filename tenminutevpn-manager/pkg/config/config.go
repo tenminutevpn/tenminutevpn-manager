@@ -3,12 +3,51 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
-	"github.com/tenminutevpn/tenminutevpn-manager/pkg/resource"
 	"github.com/tenminutevpn/tenminutevpn-manager/pkg/provider/squid"
 	"github.com/tenminutevpn/tenminutevpn-manager/pkg/provider/wireguard"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/resource"
 	"gopkg.in/yaml.v3"
 )
+
+func Parse(path string) error {
+	// check if path exists
+	file, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return fmt.Errorf("path not found: %s", path)
+	}
+
+	if file.IsDir() {
+		return ParseResourcesDirectory(path)
+	} else {
+		return ParseResources(path)
+	}
+
+}
+
+func ParseResourcesDirectory(directory string) error {
+	files, err := os.ReadDir(directory)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+
+		if filepath.Ext(file.Name()) != ".yaml" {
+			continue
+		}
+
+		filename := filepath.Join(directory, file.Name())
+		if err := ParseResources(filename); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 func ParseResources(filename string) error {
 	file, err := os.Open(filename)
@@ -16,8 +55,10 @@ func ParseResources(filename string) error {
 		return err
 	}
 	defer file.Close()
-	decoder := yaml.NewDecoder(file)
 
+	fmt.Println("Parsing file:", filename)
+
+	decoder := yaml.NewDecoder(file)
 	for {
 		var res resource.Resource
 		if err := decoder.Decode(&res); err != nil {
@@ -31,6 +72,8 @@ func ParseResources(filename string) error {
 		if err != nil {
 			return err
 		}
+
+		fmt.Println("Resource:", res.Kind, res.Metadata.Name)
 
 		switch res.Kind {
 		case "wireguard/v1":

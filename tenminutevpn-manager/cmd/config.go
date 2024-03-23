@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/tenminutevpn/tenminutevpn-manager/pkg/config"
 )
@@ -9,13 +11,13 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "A brief description of your command",
 	Run: func(cmd *cobra.Command, args []string) {
-		configFile, err := cmd.Flags().GetString("file")
+		configPath, err := cmd.Flags().GetString("file")
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 		}
 
-		if err := config.ParseResources(configFile); err != nil {
-			panic(err)
+		if err := config.Parse(configPath); err != nil {
+			fmt.Println(err)
 		}
 	},
 }
