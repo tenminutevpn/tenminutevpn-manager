@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 
 	"github.com/tenminutevpn/tenminutevpn-manager/pkg/provider/dnsmasq"
 	"github.com/tenminutevpn/tenminutevpn-manager/pkg/provider/squid"
@@ -33,6 +34,7 @@ func ParseResourcesDirectory(directory string) error {
 		return err
 	}
 
+	fileNames := make([]string, 0)
 	for _, file := range files {
 		if file.IsDir() {
 			continue
@@ -42,7 +44,12 @@ func ParseResourcesDirectory(directory string) error {
 			continue
 		}
 
-		filename := filepath.Join(directory, file.Name())
+		fileNames = append(fileNames, file.Name())
+	}
+
+	sort.Strings(fileNames)
+	for _, filename := range fileNames {
+		filename = filepath.Join(directory, filename)
 		if err := ParseResources(filename); err != nil {
 			return err
 		}
