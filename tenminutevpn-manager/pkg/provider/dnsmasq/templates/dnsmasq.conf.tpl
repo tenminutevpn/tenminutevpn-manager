@@ -7,6 +7,5 @@ server={{ . }}
 
 domain-needed
 bogus-priv
-dnssec
 
 cache-size=1000
