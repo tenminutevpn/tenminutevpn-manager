@@ -6,8 +6,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/tenminutevpn/tenminutevpn-manager/network"
-	"github.com/tenminutevpn/tenminutevpn-manager/utils"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/system/network"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/system/utils"
 )
 
 type Peer struct {

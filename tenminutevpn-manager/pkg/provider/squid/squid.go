@@ -4,7 +4,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/tenminutevpn/tenminutevpn-manager/utils"
+	"github.com/tenminutevpn/tenminutevpn-manager/pkg/system/utils"
 )
 
 type Squid struct {
